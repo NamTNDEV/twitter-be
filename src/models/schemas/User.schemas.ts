@@ -1,10 +1,6 @@
 import { ObjectId } from "mongodb"
+import { UserVerifyStatus } from "~/constants/enums"
 
-export enum UserVerifyStatus {
-  Unverified,
-  Verified,
-  Banned
-}
 export interface UserType {
   _id?: ObjectId
   name?: string
