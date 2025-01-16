@@ -7,6 +7,11 @@ class UserService {
     const result = await db.getUserCollection().insertOne(newUser);
     return result;
   }
+
+  public async checkEmailIsInUse(email: string) {
+    const user = await db.getUserCollection().findOne({ email });
+    return !!user;
+  }
 }
 
 const userService = new UserService();
