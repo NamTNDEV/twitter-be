@@ -1,18 +1,42 @@
-import { Request, Response, NextFunction } from "express";
 import { checkSchema } from "express-validator";
+import db from "~/configs/db.configs";
 import { USER_MESSAGES } from "~/constants/messages";
-import { ErrorWithStatus } from "~/models/Errors";
 import userService from "~/services/users.services";
+import { hashPassword } from "~/utils/crypto";
 import { validate } from "~/utils/validation";
 
-export const loginValidation = (req: Request, res: Response, next: NextFunction) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    res.status(400).json({ message: "Username and password are required!" });
-    return;
+export const loginValidation = validate(checkSchema({
+  email: {
+    trim: true,
+    isEmail: {
+      errorMessage: USER_MESSAGES.EMAIL_INVALID
+    },
+    notEmpty: {
+      errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+    },
+    custom: {
+      options: async (value, { req }) => {
+        const { email, password } = req.body;
+        const user = await db.getUserCollection().findOne({ email, password: hashPassword(password) });
+        if (!user) {
+          throw new Error(USER_MESSAGES.EMAIL_OR_PASSWORD_INCORRECT);
+        }
+
+        req.user = user;
+        return true;
+      }
+    }
+  },
+  password: {
+    trim: true,
+    isString: {
+      errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
+    },
+    notEmpty: {
+      errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
+    },
   }
-  next();
-}
+}));
 
 export const registerValidation = validate(checkSchema({
   name: {

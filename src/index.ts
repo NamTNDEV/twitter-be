@@ -2,7 +2,9 @@ import express from 'express';
 import usersRouter from './routes/users.routes';
 import db from './configs/db.configs';
 import { defaultErrorHandler } from './middlewares/errors.middlewares';
+import { config } from 'dotenv';
 
+config();
 const app = express();
 const PORT = process.env.PORT || 8080;
 

@@ -1,4 +1,7 @@
+import { config } from 'dotenv';
 import jwt from 'jsonwebtoken';
+
+config();
 
 export const signToken = (
   { payload,
@@ -12,10 +15,10 @@ export const signToken = (
       options?: jwt.SignOptions
     }
 ) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     jwt.sign(payload, privateKey, options, (err, token) => {
       if (err) reject(err);
-      resolve(token);
+      resolve(token as string);
     });
   });
 }

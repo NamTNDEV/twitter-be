@@ -1,6 +1,7 @@
 import { Collection, MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 import { UserType } from '~/models/schemas/User.schemas';
+import RefreshToken from '~/models/schemas/RefreshToken.schemas';
 
 dotenv.config();
 const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
@@ -39,7 +40,11 @@ class Database {
   }
 
   getUserCollection(): Collection<UserType> {
-    return this.client.db(`${process.env.DB_NAME}`).collection('users');
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_USERS}`);
+  }
+
+  getRefreshTokenCollection(): Collection<RefreshToken> {
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_REFRESH_TOKENS}`);
   }
 
   getCollection(collectionName: string) {

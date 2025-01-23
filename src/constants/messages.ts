@@ -20,4 +20,10 @@ export const USER_MESSAGES = {
   CONFIRM_PASSWORD_IS_REQUIRED: "Confirm password is required!",
   CONFIRM_PASSWORD_MUST_BE_STRING: "Confirm password must be a string!",
   CONFIRM_PASSWORD_LENGTH: "Confirm password must be between 6 and 20 characters long!",
+
+  USER_NOT_FOUND: "User not found!",
+  EMAIL_OR_PASSWORD_INCORRECT: "Email or Password is incorrect!",
+
+  LOGIN_SUCCESSFUL: "Login successful!",
+  REGISTER_SUCCESSFUL: "User registered successfully!",
 } as const;
