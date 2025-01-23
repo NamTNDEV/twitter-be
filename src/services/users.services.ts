@@ -3,10 +3,12 @@ import { RegisterReqBody } from "~/models/requests/user.requests";
 import { User } from "~/models/schemas/User.schemas";
 import { hashPassword } from "~/utils/crypto";
 import authService from "./auth.services";
+import { ObjectId } from "mongodb";
 
 class UserService {
   public async login(userId: string) {
     const [accessToken, refreshToken] = await authService.signPairOfJwtTokens(userId);
+    await authService.saveRefreshToken(userId, refreshToken);
     return { accessToken, refreshToken };
   }
 
@@ -16,6 +18,7 @@ class UserService {
 
     const userId = result.insertedId.toString();
     const [accessToken, refreshToken] = await authService.signPairOfJwtTokens(userId);
+    await authService.saveRefreshToken(userId, refreshToken);
 
     return {
       user_id: userId,

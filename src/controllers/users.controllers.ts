@@ -13,7 +13,6 @@ export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User;
   const { _id: userId } = user;
   const { accessToken, refreshToken } = await userService.login((userId as ObjectId).toString());
-  await authService.saveRefreshToken((userId as ObjectId).toString(), refreshToken);
   res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.LOGIN_SUCCESSFUL, data: { accessToken, refreshToken } });
   return;
 };
