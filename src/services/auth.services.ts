@@ -40,6 +40,15 @@ class AuthService {
       token: refreshToken
     }))
   }
+
+  public async checkRefreshTokenIsExist(refreshToken: string) {
+    return await db.getRefreshTokenCollection().findOne({ token: refreshToken });
+  }
+
+  public async deleteRefreshToken(refreshToken: string) {
+    console.log("refreshToken:::", refreshToken);
+    return await db.getRefreshTokenCollection().deleteOne({ token: refreshToken });
+  }
 }
 
 const authService = new AuthService();

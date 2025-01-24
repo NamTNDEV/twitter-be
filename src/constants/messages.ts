@@ -1,4 +1,4 @@
-export const USER_MESSAGES = {
+export const MESSAGES = {
   VALIDATION_ERROR: "Validation error!",
 
   NAME_IS_REQUIRED: "Name is required!",
@@ -26,4 +26,12 @@ export const USER_MESSAGES = {
 
   LOGIN_SUCCESSFUL: "Login successful!",
   REGISTER_SUCCESSFUL: "User registered successfully!",
+
+  ACCESS_TOKEN_INVALID: "Invalid access token!",
+  ACCESS_TOKEN_IS_REQUIRED: "Access token is required!",
+  REFRESH_TOKEN_INVALID: "Invalid refresh token!",
+  REFRESH_TOKEN_IS_REQUIRED: "Refresh token is required!",
+  REFRESH_TOKEN_NOT_FOUND: "Refresh token not found!",
+
+  LOGOUT_SUCCESSFUL: "Logout successful!",
 } as const;

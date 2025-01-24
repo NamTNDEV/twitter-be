@@ -1,71 +1,79 @@
 import { checkSchema } from "express-validator";
+import { JsonWebTokenError } from "jsonwebtoken";
+import { capitalize } from "lodash";
 import db from "~/configs/db.configs";
-import { USER_MESSAGES } from "~/constants/messages";
+import { HTTP_STATUS } from "~/constants/httpStatus";
+import { MESSAGES } from "~/constants/messages";
+import { ErrorWithStatus } from "~/models/Errors";
+import authService from "~/services/auth.services";
 import userService from "~/services/users.services";
 import { hashPassword } from "~/utils/crypto";
+import { verifyToken } from "~/utils/jwt";
 import { validate } from "~/utils/validation";
+import { Request as RequestExpress } from "express";
 
-export const loginValidation = validate(checkSchema({
-  email: {
-    trim: true,
-    isEmail: {
-      errorMessage: USER_MESSAGES.EMAIL_INVALID
-    },
-    notEmpty: {
-      errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
-    },
-    custom: {
-      options: async (value, { req }) => {
-        const { email, password } = req.body;
-        const user = await db.getUserCollection().findOne({ email, password: hashPassword(password) });
-        if (!user) {
-          throw new Error(USER_MESSAGES.EMAIL_OR_PASSWORD_INCORRECT);
+export const loginValidation = validate(
+  checkSchema({
+    email: {
+      trim: true,
+      isEmail: {
+        errorMessage: MESSAGES.EMAIL_INVALID
+      },
+      notEmpty: {
+        errorMessage: MESSAGES.EMAIL_IS_REQUIRED
+      },
+      custom: {
+        options: async (value, { req }) => {
+          const { email, password } = req.body;
+          const user = await db.getUserCollection().findOne({ email, password: hashPassword(password) });
+          if (!user) {
+            throw new Error(MESSAGES.EMAIL_OR_PASSWORD_INCORRECT);
+          }
+
+          req.user = user;
+          return true;
         }
-
-        req.user = user;
-        return true;
       }
+    },
+    password: {
+      trim: true,
+      isString: {
+        errorMessage: MESSAGES.PASSWORD_MUST_BE_STRING
+      },
+      notEmpty: {
+        errorMessage: MESSAGES.PASSWORD_IS_REQUIRED
+      },
     }
-  },
-  password: {
-    trim: true,
-    isString: {
-      errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
-    },
-    notEmpty: {
-      errorMessage: USER_MESSAGES.PASSWORD_IS_REQUIRED
-    },
-  }
-}));
+  }, ['body']));
 
 export const registerValidation = validate(checkSchema({
   name: {
     trim: true,
     isString: {
-      errorMessage: USER_MESSAGES.NAME_MUST_BE_STRING
+      errorMessage: MESSAGES.NAME_MUST_BE_STRING
     },
     notEmpty: {
-      errorMessage: USER_MESSAGES.NAME_IS_REQUIRED
+      errorMessage: MESSAGES.NAME_IS_REQUIRED
     },
     isLength: {
       options: { min: 1, max: 50 },
-      errorMessage: USER_MESSAGES.NAME_LENGTH
+      errorMessage: MESSAGES.NAME_LENGTH
     }
   },
   email: {
     trim: true,
     isEmail: {
-      errorMessage: USER_MESSAGES.EMAIL_INVALID
+      errorMessage: MESSAGES.EMAIL_INVALID
     },
     notEmpty: {
-      errorMessage: USER_MESSAGES.EMAIL_IS_REQUIRED
+      errorMessage: MESSAGES.EMAIL_IS_REQUIRED
     },
     custom: {
       options: async (value, { req }) => {
         const { email } = req.body;
         const isEmailInUse = await userService.checkEmailIsInUse(email);
         if (isEmailInUse) {
-          throw new Error(USER_MESSAGES.EMAIL_ALREADY_IN_USE);
+          throw new Error(MESSAGES.EMAIL_ALREADY_IN_USE);
         }
         return true;
       }
@@ -74,14 +82,14 @@ export const registerValidation = validate(checkSchema({
   password: {
     trim: true,
     isString: {
-      errorMessage: USER_MESSAGES.PASSWORD_MUST_BE_STRING
+      errorMessage: MESSAGES.PASSWORD_MUST_BE_STRING
     },
     isLength: {
       options: { min: 6, max: 20 },
-      errorMessage: USER_MESSAGES.PASSWORD_LENGTH
+      errorMessage: MESSAGES.PASSWORD_LENGTH
     },
     isStrongPassword: {
-      errorMessage: USER_MESSAGES.PASSWORD_STRONG,
+      errorMessage: MESSAGES.PASSWORD_STRONG,
       options: {
         minLength: 6,
         minLowercase: 1,
@@ -94,11 +102,11 @@ export const registerValidation = validate(checkSchema({
   confirmPassword: {
     trim: true,
     isString: {
-      errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRING
+      errorMessage: MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRING
     },
     isLength: {
       options: { min: 6, max: 20 },
-      errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_LENGTH
+      errorMessage: MESSAGES.CONFIRM_PASSWORD_LENGTH
     },
     // isStrongPassword: {
     //   errorMessage: "Confirm Password must be at least 6 characters long, and contain at least 1 lowercase, 1 uppercase, 1 number, and 1 symbol.",
@@ -113,7 +121,7 @@ export const registerValidation = validate(checkSchema({
     custom: {
       options: (value, { req }) => {
         if (value !== req.body.password) {
-          throw new Error(USER_MESSAGES.PASSWORDS_DO_NOT_MATCH);
+          throw new Error(MESSAGES.PASSWORDS_DO_NOT_MATCH);
         }
         return true;
       }
@@ -125,4 +133,55 @@ export const registerValidation = validate(checkSchema({
   //   },
   //   // notEmpty: true
   // }
-}))
+}, ['body']))
+
+export const accessTokenValidation = validate(checkSchema({
+  Authorization: {
+    notEmpty: {
+      errorMessage: MESSAGES.ACCESS_TOKEN_IS_REQUIRED
+    },
+    custom: {
+      options: async (value: string, { req }) => {
+        const accessToken = value.split(" ")[1];
+        if (!accessToken) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.ACCESS_TOKEN_IS_REQUIRED });
+        }
+        try {
+          const decoded_authorization = await verifyToken({ token: accessToken });
+          (req as RequestExpress).decoded_authorization = decoded_authorization;
+        } catch (error) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });
+        }
+        return true;
+      }
+    }
+  }
+}, ['headers']));
+
+export const refreshTokenValidation = validate(checkSchema({
+  refresh_token: {
+    notEmpty: {
+      errorMessage: MESSAGES.REFRESH_TOKEN_IS_REQUIRED
+    },
+    custom: {
+      options: async (value: string, { req }) => {
+        try {
+          const [decoded_refresh_token, refresh_token] = await Promise.all(
+            [verifyToken({ token: value }), authService.checkRefreshTokenIsExist(value)]
+          );
+          if (!refresh_token) {
+            throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.REFRESH_TOKEN_NOT_FOUND });
+          }
+          (req as RequestExpress).decoded_refresh_token = decoded_refresh_token;
+        } catch (error) {
+          if (error instanceof JsonWebTokenError) {
+            throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize(error.message) });
+          }
+
+          throw error;
+        }
+        return true;
+      }
+    }
+  }
+}, ['body']));
