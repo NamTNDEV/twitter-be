@@ -229,3 +229,32 @@ export const forgotPasswordValidation = validate(checkSchema({
   }
 }, ['body']));
 
+export const verifyForgotPasswordTokenValidation = validate(checkSchema({
+  forgot_password_token: {
+    trim: true,
+    custom: {
+      options: async (value: string, { req }) => {
+        if (!value) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED });
+        }
+        try {
+          const decoded_forgot_password_token = await verifyToken({ token: value, publicOrSecretKey: process.env.PASSWORD_FORGOT_TOKEN_PRIVATE_KEY as string });
+          const { user_id } = decoded_forgot_password_token;
+          const user = await userService.getUserById(user_id);
+          if (!user) {
+            throw new ErrorWithStatus({ status: HTTP_STATUS.NOT_FOUND, message: MESSAGES.USER_NOT_FOUND });
+          }
+
+          if (value !== user.forgot_password_token) {
+            throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.FORGOT_PASSWORD_TOKEN_INVALID });
+          }
+
+        } catch (error) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });
+        }
+        return true;
+      }
+    }
+  }
+}, ['body']));
+

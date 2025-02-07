@@ -41,4 +41,8 @@ export const MESSAGES = {
   EMAIL_VERIFIED: "Email verified successfully!",
   EMAIL_VERIFICATION_RESENT: "Email verification resent successfully!",
 
+  FORGOT_PASSWORD_TOKEN_IS_REQUIRED: "Forgot password token is required!",
+  FORGOT_PASSWORD_TOKEN_INVALID: "Invalid forgot password token!",
+  FORGOT_PASSWORD_TOKEN_VERIFIED: "Forgot password token verified successfully!",
+
 } as const;

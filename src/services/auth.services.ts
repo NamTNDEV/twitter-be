@@ -12,7 +12,7 @@ class AuthService {
         user_id: userId,
         token_type: TokenTypes.ForgotPasswordToken
       },
-      privateKey: process.env.PASSWORD_FORGOT_TOKEN_KEY as string,
+      privateKey: process.env.PASSWORD_FORGOT_TOKEN_PRIVATE_KEY as string,
       options: {
         expiresIn: process.env.PASSWORD_FORGOT_TOKEN_EXPIRE
       }
