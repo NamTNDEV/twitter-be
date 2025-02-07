@@ -19,6 +19,11 @@ class UserService {
     return user;
   }
 
+  public async getUserByEmail(email: string) {
+    const user = await db.getUserCollection().findOne({ email });
+    return user;
+  }
+
   public async createUser(user: RegisterReqBody) {
     const userId = new ObjectId();
     const emailVerifyToken = await emailService.signEmailVerifyToken(userId.toString());
@@ -94,6 +99,21 @@ class UserService {
     });
 
     return { email_verify_token: emailVerifyToken };
+  }
+
+  public async forgotPassword(userId: string) {
+    const forgotPasswordToken = await authService.signForgotPasswordToken(userId);
+    await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
+      $set: {
+        forgot_password_token: forgotPasswordToken,
+        // updated_at: new Date()
+      },
+      $currentDate: {
+        updated_at: true
+      }
+    });
+
+    return { forgot_password_token: forgotPasswordToken };
   }
 }
 

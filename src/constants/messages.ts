@@ -23,6 +23,7 @@ export const MESSAGES = {
 
   USER_NOT_FOUND: "User not found!",
   EMAIL_OR_PASSWORD_INCORRECT: "Email or Password is incorrect!",
+  EMAIL_IS_NOT_FOUND: "Email is not found!",
 
   LOGIN_SUCCESSFUL: "Login successful!",
   REGISTER_SUCCESSFUL: "User registered successfully!",
@@ -39,4 +40,5 @@ export const MESSAGES = {
   EMAIL_ALREADY_VERIFIED: "Email is already verified!",
   EMAIL_VERIFIED: "Email verified successfully!",
   EMAIL_VERIFICATION_RESENT: "Email verification resent successfully!",
+
 } as const;

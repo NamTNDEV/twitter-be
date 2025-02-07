@@ -6,6 +6,19 @@ import { signToken } from "~/utils/jwt";
 
 config();
 class AuthService {
+  public async signForgotPasswordToken(userId: string): Promise<string> {
+    return await signToken({
+      payload: {
+        user_id: userId,
+        token_type: TokenTypes.ForgotPasswordToken
+      },
+      privateKey: process.env.PASSWORD_FORGOT_TOKEN_KEY as string,
+      options: {
+        expiresIn: process.env.PASSWORD_FORGOT_TOKEN_EXPIRE
+      }
+    });
+  }
+
   public async signAccessToken(userId: string): Promise<string> {
 
     return await signToken({

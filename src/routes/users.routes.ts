@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { emailVerificationController, loginController, logoutController, registerController, resendEmailVerificationController } from "~/controllers/users.controllers";
-import { accessTokenValidation, emailVerifyTokenValidation, loginValidation, refreshTokenValidation, registerValidation } from "~/middlewares/users.middlewares";
+import { emailVerificationController, forgotPasswordController, loginController, logoutController, registerController, resendEmailVerificationController } from "~/controllers/users.controllers";
+import { accessTokenValidation, emailVerifyTokenValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation } from "~/middlewares/users.middlewares";
 import { wrapRequestHandler } from "~/utils/handlers";
 const usersRouter = Router();
 
@@ -14,5 +14,7 @@ usersRouter.post("/logout", accessTokenValidation, refreshTokenValidation, wrapR
 
 usersRouter.post("/verify-email", emailVerifyTokenValidation, wrapRequestHandler(emailVerificationController));
 usersRouter.post("/resend-verify-email", accessTokenValidation, wrapRequestHandler(resendEmailVerificationController));
+
+usersRouter.post("/forgot-password", forgotPasswordValidation, wrapRequestHandler(forgotPasswordController));
 
 export default usersRouter;
