@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
-import { LogoutRequestBody, RegisterReqBody } from '~/models/requests/user.requests';
+import { LogoutRequestBody, RegisterReqBody, TokenPayload } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -30,3 +30,21 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGOUT_SUCCESSFUL });
   return;
 };
+
+export const emailVerificationController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_email_token as TokenPayload;
+  const user = await userService.getUserById(user_id);
+  if (!user) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
+    return;
+  }
+  if (!user.email_verify_token) {
+    res.json({ message: MESSAGES.EMAIL_ALREADY_VERIFIED });
+    return;
+  }
+
+  const result = await userService.verifyEmail(user_id);
+  res.status(HTTP_STATUS.OK).json({ message: MESSAGES.EMAIL_VERIFIED, result });
+  return;
+};
+

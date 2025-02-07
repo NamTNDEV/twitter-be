@@ -7,13 +7,15 @@ import { signToken } from "~/utils/jwt";
 config();
 class AuthService {
   public async signAccessToken(userId: string): Promise<string> {
+
     return await signToken({
       payload: {
         user_id: userId,
         token_type: TokenTypes.AccessToken
       },
+      privateKey: process.env.JWT_ACCESS_TOKEN_PRIVATE_KEY as string,
       options: {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRE
+        expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE
       }
     });
   }
@@ -24,8 +26,9 @@ class AuthService {
         user_id: userId,
         token_type: TokenTypes.RefreshToken
       },
+      privateKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string,
       options: {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRE
+        expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRE
       }
     });
   }
@@ -46,7 +49,6 @@ class AuthService {
   }
 
   public async deleteRefreshToken(refreshToken: string) {
-    console.log("refreshToken:::", refreshToken);
     return await db.getRefreshTokenCollection().deleteOne({ token: refreshToken });
   }
 }

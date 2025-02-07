@@ -34,4 +34,8 @@ export const MESSAGES = {
   REFRESH_TOKEN_NOT_FOUND: "Refresh token not found!",
 
   LOGOUT_SUCCESSFUL: "Logout successful!",
+
+  EMAIL_TOKEN_IS_REQUIRED: "Email token is required!",
+  EMAIL_ALREADY_VERIFIED: "Email is already verified!",
+  EMAIL_VERIFIED: "Email verified successfully!",
 } as const;

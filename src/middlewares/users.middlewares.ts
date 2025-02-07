@@ -11,6 +11,7 @@ import { hashPassword } from "~/utils/crypto";
 import { verifyToken } from "~/utils/jwt";
 import { validate } from "~/utils/validation";
 import { Request as RequestExpress } from "express";
+import emailService from "~/services/email.services";
 
 export const loginValidation = validate(
   checkSchema({
@@ -137,17 +138,15 @@ export const registerValidation = validate(checkSchema({
 
 export const accessTokenValidation = validate(checkSchema({
   Authorization: {
-    notEmpty: {
-      errorMessage: MESSAGES.ACCESS_TOKEN_IS_REQUIRED
-    },
+    trim: true,
     custom: {
       options: async (value: string, { req }) => {
-        const accessToken = value.split(" ")[1];
+        const accessToken = (value || "").split(" ")[1];
         if (!accessToken) {
           throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.ACCESS_TOKEN_IS_REQUIRED });
         }
         try {
-          const decoded_authorization = await verifyToken({ token: accessToken });
+          const decoded_authorization = await verifyToken({ token: accessToken, publicOrSecretKey: process.env.JWT_ACCESS_TOKEN_PRIVATE_KEY as string });
           (req as RequestExpress).decoded_authorization = decoded_authorization;
         } catch (error) {
           throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });
@@ -160,14 +159,15 @@ export const accessTokenValidation = validate(checkSchema({
 
 export const refreshTokenValidation = validate(checkSchema({
   refresh_token: {
-    notEmpty: {
-      errorMessage: MESSAGES.REFRESH_TOKEN_IS_REQUIRED
-    },
+    trim: true,
     custom: {
       options: async (value: string, { req }) => {
+        if (!value) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.REFRESH_TOKEN_IS_REQUIRED });
+        }
         try {
           const [decoded_refresh_token, refresh_token] = await Promise.all(
-            [verifyToken({ token: value }), authService.checkRefreshTokenIsExist(value)]
+            [verifyToken({ token: value, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string }), authService.checkRefreshTokenIsExist(value)]
           );
           if (!refresh_token) {
             throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.REFRESH_TOKEN_NOT_FOUND });
@@ -185,3 +185,24 @@ export const refreshTokenValidation = validate(checkSchema({
     }
   }
 }, ['body']));
+
+export const emailVerifyTokenValidation = validate(checkSchema({
+  email_verify_token: {
+    trim: true,
+    custom: {
+      options: async (value: string, { req }) => {
+        if (!value) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.EMAIL_TOKEN_IS_REQUIRED });
+        }
+        try {
+          const decoded_email_token = await verifyToken({ token: value, publicOrSecretKey: process.env.EMAIL_TOKEN_PRIVATE_KEY as string });
+          (req as RequestExpress).decoded_email_token = decoded_email_token;
+        } catch (error) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });
+        }
+        return true;
+      }
+    }
+  }
+}, ['body']));
+

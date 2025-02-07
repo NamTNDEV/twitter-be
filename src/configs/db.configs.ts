@@ -47,6 +47,10 @@ class Database {
     return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_REFRESH_TOKENS}`);
   }
 
+  getEmailVerifyTokenCollection(): Collection<RefreshToken> {
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_EMAIL_VERIFY_TOKENS}`);
+  }
+
   getCollection(collectionName: string) {
     return this.client.db(`${process.env.DB_NAME}`).collection(collectionName);
   }

@@ -41,6 +41,7 @@ export class User {
   cover_photo: string
 
   constructor(user: UserType) {
+    this._id = user._id
     this.email = user.email
     this.password = user.password
     this.name = user.name || ''
