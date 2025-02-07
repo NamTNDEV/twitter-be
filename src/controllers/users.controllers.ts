@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb';
+import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
-import { LogoutRequestBody, RegisterReqBody, TokenPayload } from '~/models/requests/user.requests';
+import { LogoutRequestBody, RegisterReqBody, TokenPayload, VerifyEmailBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -31,7 +32,7 @@ export const logoutController = async (req: Request<ParamsDictionary, any, Logou
   return;
 };
 
-export const emailVerificationController = async (req: Request, res: Response) => {
+export const emailVerificationController = async (req: Request<ParamsDictionary, any, VerifyEmailBody>, res: Response) => {
   const { user_id } = req.decoded_email_token as TokenPayload;
   const user = await userService.getUserById(user_id);
   if (!user) {
@@ -48,3 +49,22 @@ export const emailVerificationController = async (req: Request, res: Response) =
   return;
 };
 
+export const resendEmailVerificationController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const user = await userService.getUserById(user_id);
+
+  if (!user) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
+    return;
+  }
+
+  if (user.verify === UserVerifyStatus.Verified) {
+    res.json({ message: MESSAGES.EMAIL_ALREADY_VERIFIED });
+    return;
+  }
+
+  const result = await userService.resendEmailVerification(user._id.toString());
+
+  res.json({ message: MESSAGES.EMAIL_VERIFICATION_RESENT, result });
+  return;
+};

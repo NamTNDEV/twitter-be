@@ -42,7 +42,35 @@ class UserService {
   public async verifyEmail(userId: string) {
     const [pairOfTokens] = await Promise.all([
       await authService.signPairOfJwtTokens(userId),
-      await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, { $set: { verify: UserVerifyStatus.Verified, email_verify_token: '', updated_at: new Date() } })
+      await db.getUserCollection().updateOne({ _id: new ObjectId(userId) },
+        {
+          $set: {
+            verify: UserVerifyStatus.Verified,
+            email_verify_token: '',
+            // updated_at: new Date()
+          },
+          $currentDate: {
+            updated_at: true
+          }
+        }
+        // ,
+
+        //Cách 2: Sử dụng $$NOW để lấy thời gian hiện tại của MongoDB
+        //   [
+        //     {
+        //       $set: {
+        //         verify: UserVerifyStatus.Verified,
+        //         email_verify_token: '',
+        //         updated_at: '$$NOW'
+        //       }
+        //     },
+        //     // {
+        //     //   $currentDate: {
+        //     //     updated_at: true
+        //     //   }
+        //     // }
+        //   ]
+      )
     ]);
 
     const [accessToken, refreshToken] = pairOfTokens;
@@ -51,6 +79,21 @@ class UserService {
       accessToken,
       refreshToken
     }
+  }
+
+  public async resendEmailVerification(userId: string) {
+    const emailVerifyToken = await emailService.signEmailVerifyToken(userId);
+    await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
+      $set: {
+        email_verify_token: emailVerifyToken,
+        // updated_at: new Date()
+      },
+      $currentDate: {
+        updated_at: true
+      }
+    });
+
+    return { email_verify_token: emailVerifyToken };
   }
 }
 
