@@ -14,8 +14,8 @@ class UserService {
     return { accessToken, refreshToken };
   }
 
-  public async getUserById(userId: string) {
-    const user = await db.getUserCollection().findOne({ _id: new ObjectId(userId) });
+  public async getUserById(userId: string, customProjection?: any) {
+    const user = await db.getUserCollection().findOne({ _id: new ObjectId(userId) }, { projection: customProjection });
     return user;
   }
 
