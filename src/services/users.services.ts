@@ -115,6 +115,20 @@ class UserService {
 
     return { forgot_password_token: forgotPasswordToken };
   }
+
+  public async resetPassword(userId: string, password: string) {
+    const newPassword = hashPassword(password);
+    await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
+      $set: {
+        password: newPassword,
+        forgot_password_token: '',
+        // updated_at: new Date()
+      },
+      $currentDate: {
+        updated_at: true
+      }
+    });
+  }
 }
 
 const userService = new UserService();

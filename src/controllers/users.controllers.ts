@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
-import { ForgotPasswordReqBody, LogoutRequestBody, RegisterReqBody, TokenPayload, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
+import { ForgotPasswordReqBody, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -79,5 +79,13 @@ export const forgotPasswordController = async (req: Request<ParamsDictionary, an
 
 export const verifyForgotPasswordTokenController = async (req: Request<ParamsDictionary, any, VerifyForgotPasswordTokenReqBody>, res: Response) => {
   res.json({ message: MESSAGES.FORGOT_PASSWORD_TOKEN_VERIFIED });
+  return;
+}
+
+export const resetPasswordController = async (req: Request<ParamsDictionary, any, ResetPasswordReqBody>, res: Response) => {
+  const { user_id } = req.decoded_forgot_password_token as TokenPayload;
+  const { password } = req.body;
+  await userService.resetPassword(user_id, password);
+  res.json({ message: MESSAGES.RESET_PASSWORD_SUCCESSFUL });
   return;
 }
