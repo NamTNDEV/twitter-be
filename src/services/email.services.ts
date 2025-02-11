@@ -1,16 +1,17 @@
 import { config } from "dotenv";
 import db from "~/configs/db.configs";
-import { TokenTypes } from "~/constants/enums";
+import { TokenTypes, UserVerifyStatus } from "~/constants/enums";
 import { signToken } from "~/utils/jwt";
 
 config();
 
 class EmailService {
-  public async signEmailVerifyToken(userId: string): Promise<string> {
+  public async signEmailVerifyToken({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }): Promise<string> {
     return await signToken({
       payload: {
         user_id: userId,
-        token_type: TokenTypes.EmailVerifyToken
+        token_type: TokenTypes.EmailVerifyToken,
+        verify_status: verifyStatus
       },
       privateKey: process.env.EMAIL_TOKEN_PRIVATE_KEY as string,
       options: {

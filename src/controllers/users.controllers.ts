@@ -12,8 +12,9 @@ import userService from '~/services/users.services';
 
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User;
-  const { _id: userId } = user;
-  const { accessToken, refreshToken } = await userService.login((userId as ObjectId).toString());
+  const { _id: userId, verify } = user;
+  console.log("User::: ", user);
+  const { accessToken, refreshToken } = await userService.login({ userId: (userId as ObjectId).toString(), verifyStatus: verify });
   res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGIN_SUCCESSFUL, data: { accessToken, refreshToken } });
   return;
 };
@@ -70,9 +71,8 @@ export const resendEmailVerificationController = async (req: Request, res: Respo
 };
 
 export const forgotPasswordController = async (req: Request<ParamsDictionary, any, ForgotPasswordReqBody>, res: Response) => {
-  const { _id } = req.user as User;
-  const result = await userService.forgotPassword((_id as ObjectId).toString());
-
+  const { _id, verify } = req.user as User;
+  const result = await userService.forgotPassword({ userId: (_id as ObjectId).toString(), verifyStatus: verify });
   res.json({ message: MESSAGES.EMAIL_VERIFICATION_RESENT, result });
   return;
 }
@@ -94,5 +94,11 @@ export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const user = await userService.getUserById(user_id, { password: 0, email_verify_token: 0, forgot_password_token: 0 });
   res.json({ data: user });
+  return;
+}
+
+export const updateMeController = async (req: Request, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  res.json({ message: "Update Me Controller", data: { user_id } });
   return;
 }

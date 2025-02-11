@@ -22,6 +22,7 @@ export const MESSAGES = {
   CONFIRM_PASSWORD_LENGTH: "Confirm password must be between 6 and 20 characters long!",
 
   USER_NOT_FOUND: "User not found!",
+  USER_NOT_VERIFIED: "User not verified!",
   EMAIL_OR_PASSWORD_INCORRECT: "Email or Password is incorrect!",
   EMAIL_IS_NOT_FOUND: "Email is not found!",
 

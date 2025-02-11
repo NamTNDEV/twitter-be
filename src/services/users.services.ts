@@ -8,8 +8,8 @@ import emailService from "./email.services";
 import { UserVerifyStatus } from "~/constants/enums";
 
 class UserService {
-  public async login(userId: string) {
-    const [accessToken, refreshToken] = await authService.signPairOfJwtTokens(userId);
+  public async login({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
+    const [accessToken, refreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus });
     await authService.saveRefreshToken(userId, refreshToken);
     return { accessToken, refreshToken };
   }
@@ -26,11 +26,19 @@ class UserService {
 
   public async createUser(user: RegisterReqBody) {
     const userId = new ObjectId();
-    const emailVerifyToken = await emailService.signEmailVerifyToken(userId.toString());
+    const emailVerifyToken = await emailService.signEmailVerifyToken({
+      userId: userId.toString(),
+      verifyStatus: UserVerifyStatus.Unverified
+    });
     const newUser = new User({ ...user, _id: userId, password: hashPassword(user.password), date_of_birth: new Date(user.date_of_birth), email_verify_token: emailVerifyToken });
     await db.getUserCollection().insertOne(newUser);
 
-    const [accessToken, refreshToken] = await authService.signPairOfJwtTokens(userId.toString());
+    const [accessToken, refreshToken] = await authService.signPairOfJwtTokens(
+      {
+        userId: userId.toString(),
+        verifyStatus: UserVerifyStatus.Unverified
+      }
+    );
 
     await authService.saveRefreshToken(userId.toString(), refreshToken);
     return {
@@ -46,7 +54,7 @@ class UserService {
 
   public async verifyEmail(userId: string) {
     const [pairOfTokens] = await Promise.all([
-      await authService.signPairOfJwtTokens(userId),
+      await authService.signPairOfJwtTokens({ userId, verifyStatus: UserVerifyStatus.Verified }),
       await db.getUserCollection().updateOne({ _id: new ObjectId(userId) },
         {
           $set: {
@@ -87,7 +95,7 @@ class UserService {
   }
 
   public async resendEmailVerification(userId: string) {
-    const emailVerifyToken = await emailService.signEmailVerifyToken(userId);
+    const emailVerifyToken = await emailService.signEmailVerifyToken({ userId, verifyStatus: UserVerifyStatus.Unverified });
     await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
       $set: {
         email_verify_token: emailVerifyToken,
@@ -101,8 +109,8 @@ class UserService {
     return { email_verify_token: emailVerifyToken };
   }
 
-  public async forgotPassword(userId: string) {
-    const forgotPasswordToken = await authService.signForgotPasswordToken(userId);
+  public async forgotPassword({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
+    const forgotPasswordToken = await authService.signForgotPasswordToken({ userId, verifyStatus });
     await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
       $set: {
         forgot_password_token: forgotPasswordToken,

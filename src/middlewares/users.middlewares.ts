@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from 'express';
 import { checkSchema, ParamSchema } from "express-validator";
 import { JsonWebTokenError } from "jsonwebtoken";
 import { capitalize } from "lodash";
@@ -12,6 +13,9 @@ import { verifyToken } from "~/utils/jwt";
 import { validate } from "~/utils/validation";
 import { Request as RequestExpress } from "express";
 import emailService from "~/services/email.services";
+import { User } from '~/models/schemas/User.schemas';
+import { UserVerifyStatus } from '~/constants/enums';
+import { TokenPayload } from '~/models/requests/user.requests';
 
 const passwordValidatorSchema: ParamSchema = {
   trim: true,
@@ -21,12 +25,29 @@ const passwordValidatorSchema: ParamSchema = {
   notEmpty: {
     errorMessage: MESSAGES.PASSWORD_IS_REQUIRED
   },
+  isLength: {
+    options: { min: 6, max: 20 },
+    errorMessage: MESSAGES.CONFIRM_PASSWORD_LENGTH
+  },
+  // isStrongPassword: {
+  //   errorMessage: "Password must be at least 6 characters long, and contain at least 1 lowercase, 1 uppercase, 1 number, and 1 symbol.",
+  //   options: {
+  //     minLength: 6,
+  //     minLowercase: 1,
+  //     minUppercase: 1,
+  //     minNumbers: 1,
+  //     minSymbols: 1,
+  //   }
+  // },
 };
 
 const confirmPasswordValidatorSchema: ParamSchema = {
   trim: true,
   isString: {
     errorMessage: MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRING
+  },
+  notEmpty: {
+    errorMessage: MESSAGES.PASSWORD_IS_REQUIRED
   },
   isLength: {
     options: { min: 6, max: 20 },
@@ -252,3 +273,14 @@ export const resetPasswordValidation = validate(checkSchema({
   confirmPassword: confirmPasswordValidatorSchema,
   forgot_password_token: forgotPasswordTokenValidatorSchema
 }, ['body']));
+
+export const verifiedUserValidation = (req: Request, res: Response, next: NextFunction) => {
+  const { verify_status } = req.decoded_authorization as TokenPayload;
+  if (verify_status !== UserVerifyStatus.Verified) {
+    next(
+      res.status(HTTP_STATUS.FORBIDDEN).json({ message: MESSAGES.USER_NOT_VERIFIED })
+    )
+    return;
+  }
+  next();
+}
