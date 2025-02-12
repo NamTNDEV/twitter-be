@@ -70,5 +70,7 @@ export const MESSAGES = {
   FOLLOWEE_NOT_FOUND: "Followee not found!",
   ALREADY_FOLLOWED: "Already following!",
   CAN_NOT_FOLLOW_YOURSELF: "Can not follow yourself!",
+  UNFOLLOW_SUCCESSFUL: "Unfollow successful!",
+  NOT_FOLLOWED_YET: "Not followed yet!",
 
 } as const; 

@@ -208,13 +208,19 @@ class UserService {
     if (await this.isAlreadyFollowed(followerId, followeeId)) {
       return { message: MESSAGES.ALREADY_FOLLOWED };
     }
-
     await db.getFollowersCollection().insertOne(new Follower({
       userId: new ObjectId(followerId),
       followeeId: new ObjectId(followeeId)
     }));
-
     return { message: MESSAGES.FOLLOW_SUCCESSFUL };
+  }
+
+  public async unfollowUser(followerId: string, followeeId: string) {
+    if (!await this.isAlreadyFollowed(followerId, followeeId)) {
+      return { message: MESSAGES.NOT_FOLLOWED_YET };
+    }
+    await db.getFollowersCollection().deleteOne({ userId: new ObjectId(followerId), followeeId: new ObjectId(followeeId) });
+    return { message: MESSAGES.UNFOLLOW_SUCCESSFUL };
   }
 }
 
