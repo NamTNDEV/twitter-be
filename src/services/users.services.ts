@@ -214,6 +214,18 @@ class UserService {
     await db.getFollowersCollection().deleteOne({ userId: new ObjectId(followerId), followeeId: new ObjectId(followeeId) });
     return { message: MESSAGES.UNFOLLOW_SUCCESSFUL };
   }
+
+  public async changePassword(userId: string, newPassword: string) {
+    const hashedPassword = hashPassword(newPassword);
+    await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
+      $set: {
+        password: hashedPassword,
+      },
+      $currentDate: {
+        updated_at: true
+      }
+    });
+  }
 }
 
 const userService = new UserService();

@@ -20,6 +20,12 @@ export const MESSAGES = {
   CONFIRM_PASSWORD_IS_REQUIRED: "Confirm password is required!",
   CONFIRM_PASSWORD_MUST_BE_STRING: "Confirm password must be a string!",
   CONFIRM_PASSWORD_LENGTH: "Confirm password must be between 6 and 20 characters long!",
+  CONFIRM_PASSWORD_IS_NOT_MATCHED: "Confirm password is not matched!",
+
+  OLD_PASSWORD_IS_REQUIRED: "Old password is required!",
+  OLD_PASSWORD_MUST_BE_STRING: "Old password must be a string!",
+  OLD_PASSWORD_LENGTH: "Old password must be between 6 and 20 characters long!",
+  OLD_PASSWORD_INVALID: "Invalid old password!",
 
   USER_NOT_FOUND: "User not found!",
   USER_NOT_VERIFIED: "User not verified!",
@@ -73,5 +79,9 @@ export const MESSAGES = {
   CAN_NOT_FOLLOW_YOURSELF: "Can not follow yourself!",
   UNFOLLOW_SUCCESSFUL: "Unfollow successful!",
   NOT_FOLLOWED_YET: "Not followed yet!",
+
+  OLD_PASSWORD_IS_NOT_MATCHED: "Old password is not matched!",
+  NEW_PASSWORD_IS_SAME_AS_OLD_PASSWORD: "New password must be different from the old password",
+  CHANGE_PASSWORD_SUCCESSFUL: "Change password successful!",
 
 } as const; 

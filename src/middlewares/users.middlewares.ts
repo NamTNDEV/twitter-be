@@ -49,7 +49,7 @@ const confirmPasswordValidatorSchema: ParamSchema = {
     errorMessage: MESSAGES.CONFIRM_PASSWORD_MUST_BE_STRING
   },
   notEmpty: {
-    errorMessage: MESSAGES.PASSWORD_IS_REQUIRED
+    errorMessage: MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
   },
   isLength: {
     options: { min: 6, max: 20 },
@@ -68,7 +68,7 @@ const confirmPasswordValidatorSchema: ParamSchema = {
   custom: {
     options: (value, { req }) => {
       if (value !== req.body.password) {
-        throw new Error(MESSAGES.PASSWORDS_DO_NOT_MATCH);
+        throw new Error(MESSAGES.CONFIRM_PASSWORD_IS_NOT_MATCHED);
       }
       return true;
     }
@@ -421,3 +421,41 @@ export const followValidation = validate(checkSchema({
 export const unfollowValidation = validate(checkSchema({
   followee_id: followeeIdValidatorSchema
 }, ['params']));
+
+export const changePasswordValidation = validate(checkSchema({
+  old_password: {
+    notEmpty: {
+      errorMessage: MESSAGES.OLD_PASSWORD_IS_REQUIRED
+    },
+    isString: {
+      errorMessage: MESSAGES.OLD_PASSWORD_MUST_BE_STRING
+    },
+    trim: true,
+    custom: {
+      options: async (value, { req }) => {
+        const { user_id } = req.decoded_authorization as TokenPayload;
+        const user = await userService.getUserById(user_id);
+        if (!user) {
+          throw new Error(MESSAGES.USER_NOT_FOUND);
+        }
+        if (user.password !== hashPassword(value)) {
+          throw new Error(MESSAGES.OLD_PASSWORD_IS_NOT_MATCHED);
+        }
+        return true;
+      }
+    }
+  },
+  password: {
+    ...passwordValidatorSchema,
+    custom: {
+      options: async (value, { req }) => {
+        const { old_password } = req.body;
+        if (value === old_password) {
+          throw new Error(MESSAGES.NEW_PASSWORD_IS_SAME_AS_OLD_PASSWORD);
+        }
+        return true
+      }
+    }
+  },
+  confirm_password: confirmPasswordValidatorSchema
+}, ['body']));

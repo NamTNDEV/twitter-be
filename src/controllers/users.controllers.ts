@@ -5,7 +5,7 @@ import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
 import { ErrorWithStatus } from '~/models/Errors';
-import { FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, UnfollowReqParams, UpdateMeReqBody, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
+import { ChangePasswordReqBody, FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, UnfollowReqParams, UpdateMeReqBody, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -133,5 +133,13 @@ export const unfollowController = async (req: Request<UnfollowReqParams>, res: R
   const { followee_id } = req.params;
   const result = await userService.unfollowUser(user_id, followee_id);
   res.json({ message: result.message });
+  return;
+}
+
+export const changePasswordController = async (req: Request<ParamsDictionary, any, ChangePasswordReqBody>, res: Response) => {
+  const { password } = req.body;
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  await userService.changePassword(user_id, password);
+  res.json({ message: MESSAGES.CHANGE_PASSWORD_SUCCESSFUL });
   return;
 }
