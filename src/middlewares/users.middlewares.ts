@@ -16,6 +16,7 @@ import emailService from "~/services/email.services";
 import { User } from '~/models/schemas/User.schemas';
 import { UserVerifyStatus } from '~/constants/enums';
 import { TokenPayload } from '~/models/requests/user.requests';
+import { ObjectId } from 'mongodb';
 
 const passwordValidatorSchema: ParamSchema = {
   trim: true,
@@ -380,4 +381,37 @@ export const updateMeValidation = validate(checkSchema({
   },
   avatar: imageUrlValidatorSchema,
   cover_photo: imageUrlValidatorSchema
+}, ['body']));
+
+export const followValidation = validate(checkSchema({
+  followee_id: {
+    trim: true,
+    notEmpty: {
+      errorMessage: MESSAGES.FOLLOWEE_ID_IS_REQUIRED
+    },
+    isString: {
+      errorMessage: MESSAGES.FOLLOWEE_ID_MUST_BE_A_STRING
+    },
+    custom: {
+      options: async (value: string, { req }) => {
+        const { user_id } = req.decoded_authorization as TokenPayload;
+
+        if (!ObjectId.isValid(value)) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.NOT_FOUND, message: MESSAGES.FOLLOWEE_ID_INVALID });
+        }
+
+        const followee = await userService.getUserById(value);
+
+        if (!followee) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.NOT_FOUND, message: MESSAGES.USER_NOT_FOUND });
+        }
+
+        if (user_id === value) {
+          throw new ErrorWithStatus({ status: HTTP_STATUS.BAD_REQUEST, message: MESSAGES.CAN_NOT_FOLLOW_YOURSELF });
+        }
+
+        return true;
+      }
+    }
+  }
 }, ['body']));

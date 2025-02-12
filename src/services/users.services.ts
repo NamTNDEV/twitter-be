@@ -9,6 +9,7 @@ import { UserVerifyStatus } from "~/constants/enums";
 import { ErrorWithStatus } from "~/models/Errors";
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { MESSAGES } from "~/constants/messages";
+import Follower from "~/models/schemas/Follower.schemas";
 
 class UserService {
   public async login({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
@@ -196,6 +197,24 @@ class UserService {
     }
 
     return user;
+  }
+
+  public async isAlreadyFollowed(followerId: string, followeeId: string) {
+    const isAlreadyFollowed = await db.getFollowersCollection().findOne({ userId: new ObjectId(followerId), followeeId: new ObjectId(followeeId) });
+    return !!isAlreadyFollowed;
+  }
+
+  public async followUser(followerId: string, followeeId: string) {
+    if (await this.isAlreadyFollowed(followerId, followeeId)) {
+      return { message: MESSAGES.ALREADY_FOLLOWED };
+    }
+
+    await db.getFollowersCollection().insertOne(new Follower({
+      userId: new ObjectId(followerId),
+      followeeId: new ObjectId(followeeId)
+    }));
+
+    return { message: MESSAGES.FOLLOW_SUCCESSFUL };
   }
 }
 

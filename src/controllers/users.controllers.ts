@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
-import { ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
+import { FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -109,5 +109,13 @@ export const getProfileController = async (req: Request<GetProfileReqParams>, re
   const { username } = req.params;
   const user = await userService.getUserByUsername(username);
   res.json({ message: MESSAGES.GET_PROFILE_SUCCESSFUL, result: user });
+  return;
+}
+
+export const followController = async (req: Request<ParamsDictionary, any, FollowReqBody>, res: Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload;
+  const { followee_id } = req.body;
+  const result = await userService.followUser(user_id, followee_id);
+  res.json({ message: result.message });
   return;
 }

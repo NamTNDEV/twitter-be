@@ -2,6 +2,7 @@ import { Collection, MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 import { UserType } from '~/models/schemas/User.schemas';
 import RefreshToken from '~/models/schemas/RefreshToken.schemas';
+import Follower from '~/models/schemas/Follower.schemas';
 
 dotenv.config();
 const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
@@ -49,6 +50,10 @@ class Database {
 
   getEmailVerifyTokenCollection(): Collection<RefreshToken> {
     return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_EMAIL_VERIFY_TOKENS}`);
+  }
+
+  getFollowersCollection(): Collection<Follower> {
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_FOLLOWERS}`);
   }
 
   getCollection(collectionName: string) {

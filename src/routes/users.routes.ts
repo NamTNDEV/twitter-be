@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { emailVerificationController, forgotPasswordController, getMeController, getProfileController, loginController, logoutController, registerController, resendEmailVerificationController, resetPasswordController, updateMeController, verifyForgotPasswordTokenController } from "~/controllers/users.controllers";
+import { emailVerificationController, followController, forgotPasswordController, getMeController, getProfileController, loginController, logoutController, registerController, resendEmailVerificationController, resetPasswordController, updateMeController, verifyForgotPasswordTokenController } from "~/controllers/users.controllers";
 import { filterMiddleware } from "~/middlewares/common.middlewares";
-import { accessTokenValidation, emailVerifyTokenValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation, resetPasswordValidation, updateMeValidation, verifiedUserValidation, verifyForgotPasswordTokenValidation } from "~/middlewares/users.middlewares";
+import { accessTokenValidation, emailVerifyTokenValidation, followValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation, resetPasswordValidation, updateMeValidation, verifiedUserValidation, verifyForgotPasswordTokenValidation } from "~/middlewares/users.middlewares";
 import { UpdateMeReqBody } from "~/models/requests/user.requests";
 import { wrapRequestHandler } from "~/utils/handlers";
 const usersRouter = Router();
@@ -25,5 +25,7 @@ usersRouter.get("/me", accessTokenValidation, wrapRequestHandler(getMeController
 usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, updateMeValidation, filterMiddleware<UpdateMeReqBody>(['name', 'date_of_birth', 'bio', 'location', 'website', 'username', 'avatar', 'cover_photo']), wrapRequestHandler(updateMeController));
 
 usersRouter.get("/:username", wrapRequestHandler(getProfileController));
+
+usersRouter.post("/follow", accessTokenValidation, verifiedUserValidation, followValidation, wrapRequestHandler(followController));
 
 export default usersRouter;

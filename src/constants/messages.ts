@@ -63,4 +63,12 @@ export const MESSAGES = {
   GET_PROFILE_SUCCESSFUL: "Get profile successful!",
   UPDATE_ME_SUCCESSFUL: "Update me successful!",
 
+  FOLLOW_SUCCESSFUL: "Follow successful!",
+  FOLLOWEE_ID_IS_REQUIRED: "Followee ID is required!",
+  FOLLOWEE_ID_MUST_BE_A_STRING: "Followee ID must be a string!",
+  FOLLOWEE_ID_INVALID: "Invalid followee ID!",
+  FOLLOWEE_NOT_FOUND: "Followee not found!",
+  ALREADY_FOLLOWED: "Already following!",
+  CAN_NOT_FOLLOW_YOURSELF: "Can not follow yourself!",
+
 } as const; 
