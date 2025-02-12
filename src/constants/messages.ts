@@ -47,4 +47,15 @@ export const MESSAGES = {
   FORGOT_PASSWORD_TOKEN_VERIFIED: "Forgot password token verified successfully!",
   RESET_PASSWORD_SUCCESSFUL: "Password reset successfully!",
 
-} as const;
+  DATE_OF_BIRTH_INVALID: "Invalid date of birth!",
+  BIO_MUST_BE_STRING: "Bio must be a string!",
+  BIO_LENGTH: "Bio must be between 1 and 500 characters long!",
+  LOCATION_MUST_BE_STRING: "Location must be a string!",
+  LOCATION_LENGTH: "Location must be between 1 and 50 characters long!",
+  WEBSITE_INVALID: "Invalid website!",
+  WEBSITE_LENGTH: "Website must be between 1 and 100 characters long!",
+  USERNAME_MUST_BE_A_STRING: "Invalid username!",
+  USERNAME_LENGTH: "Username must be between 1 and 50 characters long!",
+  IMAGE_URL_MUST_BE_A_STRING: "Invalid image URL!",
+  IMAGE_URL_LENGTH: "Image URL must be between 1 and 400 characters long!",
+} as const; 

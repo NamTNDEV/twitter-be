@@ -99,6 +99,8 @@ export const getMeController = async (req: Request, res: Response) => {
 
 export const updateMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
-  res.json({ message: "Update Me Controller", data: { user_id } });
+  const { body } = req;
+  const result = await userService.updateMe(user_id, body);
+  res.json({ message: "Update Me Controller", result });
   return;
 }

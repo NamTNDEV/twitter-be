@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { emailVerificationController, forgotPasswordController, getMeController, loginController, logoutController, registerController, resendEmailVerificationController, resetPasswordController, updateMeController, verifyForgotPasswordTokenController } from "~/controllers/users.controllers";
-import { accessTokenValidation, emailVerifyTokenValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation, resetPasswordValidation, verifiedUserValidation, verifyForgotPasswordTokenValidation } from "~/middlewares/users.middlewares";
+import { accessTokenValidation, emailVerifyTokenValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation, resetPasswordValidation, updateMeValidation, verifiedUserValidation, verifyForgotPasswordTokenValidation } from "~/middlewares/users.middlewares";
 import { wrapRequestHandler } from "~/utils/handlers";
 const usersRouter = Router();
 
@@ -20,6 +20,6 @@ usersRouter.post("/verify-forgot-password-token", verifyForgotPasswordTokenValid
 usersRouter.post("/reset-password", resetPasswordValidation, wrapRequestHandler(resetPasswordController));
 
 usersRouter.get("/me", accessTokenValidation, wrapRequestHandler(getMeController));
-usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, wrapRequestHandler(updateMeController));
+usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, updateMeValidation, wrapRequestHandler(updateMeController));
 
 export default usersRouter;

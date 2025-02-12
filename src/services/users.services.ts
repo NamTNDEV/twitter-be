@@ -1,5 +1,5 @@
 import db from "~/configs/db.configs";
-import { RegisterReqBody } from "~/models/requests/user.requests";
+import { RegisterReqBody, UpdateMeReqBody } from "~/models/requests/user.requests";
 import { User } from "~/models/schemas/User.schemas";
 import { hashPassword } from "~/utils/crypto";
 import authService from "./auth.services";
@@ -136,6 +136,30 @@ class UserService {
         updated_at: true
       }
     });
+  }
+
+  public async updateMe(userId: string, payload: UpdateMeReqBody) {
+    const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload;
+    const updatedUser = await db.getUserCollection().findOneAndUpdate(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          ...(_payload as UpdateMeReqBody & { date_of_birth: Date }),
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      },
+      {
+        returnDocument: 'after',
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
+      });
+
+    return updatedUser;
   }
 }
 
