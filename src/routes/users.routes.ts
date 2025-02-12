@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { emailVerificationController, forgotPasswordController, getMeController, loginController, logoutController, registerController, resendEmailVerificationController, resetPasswordController, updateMeController, verifyForgotPasswordTokenController } from "~/controllers/users.controllers";
+import { filterMiddleware } from "~/middlewares/common.middlewares";
 import { accessTokenValidation, emailVerifyTokenValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation, resetPasswordValidation, updateMeValidation, verifiedUserValidation, verifyForgotPasswordTokenValidation } from "~/middlewares/users.middlewares";
+import { UpdateMeReqBody } from "~/models/requests/user.requests";
 import { wrapRequestHandler } from "~/utils/handlers";
 const usersRouter = Router();
 
@@ -20,6 +22,6 @@ usersRouter.post("/verify-forgot-password-token", verifyForgotPasswordTokenValid
 usersRouter.post("/reset-password", resetPasswordValidation, wrapRequestHandler(resetPasswordController));
 
 usersRouter.get("/me", accessTokenValidation, wrapRequestHandler(getMeController));
-usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, updateMeValidation, wrapRequestHandler(updateMeController));
+usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, updateMeValidation, filterMiddleware<UpdateMeReqBody>(['name', 'date_of_birth', 'bio', 'location', 'website', 'username', 'avatar', 'cover_photo']), wrapRequestHandler(updateMeController));
 
 export default usersRouter;
