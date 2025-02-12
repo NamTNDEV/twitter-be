@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
-import { ForgotPasswordReqBody, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
+import { ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -93,7 +93,7 @@ export const resetPasswordController = async (req: Request<ParamsDictionary, any
 export const getMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const user = await userService.getUserById(user_id, { password: 0, email_verify_token: 0, forgot_password_token: 0 });
-  res.json({ data: user });
+  res.json({ message: MESSAGES.GET_ME_SUCCESSFUL, result: user });
   return;
 }
 
@@ -101,6 +101,13 @@ export const updateMeController = async (req: Request, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { body } = req;
   const result = await userService.updateMe(user_id, body);
-  res.json({ message: "Update Me Controller", result });
+  res.json({ message: MESSAGES.UPDATE_ME_SUCCESSFUL, result });
+  return;
+}
+
+export const getProfileController = async (req: Request<GetProfileReqParams>, res: Response) => {
+  const { username } = req.params;
+  const user = await userService.getUserByUsername(username);
+  res.json({ message: MESSAGES.GET_PROFILE_SUCCESSFUL, result: user });
   return;
 }

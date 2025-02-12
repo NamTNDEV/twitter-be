@@ -6,6 +6,9 @@ import authService from "./auth.services";
 import { ObjectId } from "mongodb";
 import emailService from "./email.services";
 import { UserVerifyStatus } from "~/constants/enums";
+import { ErrorWithStatus } from "~/models/Errors";
+import { HTTP_STATUS } from "~/constants/httpStatus";
+import { MESSAGES } from "~/constants/messages";
 
 class UserService {
   public async login({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
@@ -30,7 +33,14 @@ class UserService {
       userId: userId.toString(),
       verifyStatus: UserVerifyStatus.Unverified
     });
-    const newUser = new User({ ...user, _id: userId, password: hashPassword(user.password), date_of_birth: new Date(user.date_of_birth), email_verify_token: emailVerifyToken });
+    const newUser = new User({
+      ...user,
+      _id: userId,
+      password: hashPassword(user.password),
+      date_of_birth: new Date(user.date_of_birth),
+      email_verify_token: emailVerifyToken,
+      username: user.email.split('@')[0] + userId.toString().slice(-4),
+    });
     await db.getUserCollection().insertOne(newUser);
 
     const [accessToken, refreshToken] = await authService.signPairOfJwtTokens(
@@ -160,6 +170,32 @@ class UserService {
       });
 
     return updatedUser;
+  }
+
+  public async getUserByUsername(username: string) {
+    const user = await db.getUserCollection().findOne(
+      { username },
+      {
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0,
+          verify: 0,
+          created_at: 0,
+          updated_at: 0
+        }
+      }
+    );
+
+    if (!user) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: MESSAGES.USER_NOT_FOUND
+      }
+      )
+    }
+
+    return user;
   }
 }
 

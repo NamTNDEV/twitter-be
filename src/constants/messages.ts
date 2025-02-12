@@ -58,4 +58,9 @@ export const MESSAGES = {
   USERNAME_LENGTH: "Username must be between 1 and 50 characters long!",
   IMAGE_URL_MUST_BE_A_STRING: "Invalid image URL!",
   IMAGE_URL_LENGTH: "Image URL must be between 1 and 400 characters long!",
+
+  GET_ME_SUCCESSFUL: "Get me successful!",
+  GET_PROFILE_SUCCESSFUL: "Get profile successful!",
+  UPDATE_ME_SUCCESSFUL: "Update me successful!",
+
 } as const; 
