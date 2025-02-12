@@ -188,14 +188,6 @@ class UserService {
       }
     );
 
-    if (!user) {
-      throw new ErrorWithStatus({
-        status: HTTP_STATUS.NOT_FOUND,
-        message: MESSAGES.USER_NOT_FOUND
-      }
-      )
-    }
-
     return user;
   }
 

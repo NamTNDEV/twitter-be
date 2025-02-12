@@ -22,7 +22,7 @@ usersRouter.post("/verify-forgot-password-token", verifyForgotPasswordTokenValid
 usersRouter.post("/reset-password", resetPasswordValidation, wrapRequestHandler(resetPasswordController));
 
 usersRouter.get("/me", accessTokenValidation, wrapRequestHandler(getMeController));
-usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, updateMeValidation, filterMiddleware<UpdateMeReqBody>(['name', 'date_of_birth', 'bio', 'location', 'website', 'username', 'avatar', 'cover_photo']), wrapRequestHandler(updateMeController));
+usersRouter.patch("/me", accessTokenValidation, verifiedUserValidation, updateMeValidation, filterMiddleware<UpdateMeReqBody>(['date_of_birth', 'bio', 'location', 'website', 'username', 'avatar', 'cover_photo']), wrapRequestHandler(updateMeController));
 
 usersRouter.get("/:username", wrapRequestHandler(getProfileController));
 

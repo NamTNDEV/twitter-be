@@ -17,6 +17,7 @@ import { User } from '~/models/schemas/User.schemas';
 import { UserVerifyStatus } from '~/constants/enums';
 import { TokenPayload } from '~/models/requests/user.requests';
 import { ObjectId } from 'mongodb';
+import { REGEX_USERNAME } from '~/constants/regex';
 
 const passwordValidatorSchema: ParamSchema = {
   trim: true,
@@ -396,12 +397,17 @@ export const updateMeValidation = validate(checkSchema({
     isString: {
       errorMessage: MESSAGES.USERNAME_MUST_BE_A_STRING
     },
-    isLength: {
-      options: {
-        min: 1,
-        max: 50,
-      },
-      errorMessage: MESSAGES.USERNAME_LENGTH
+    custom: {
+      options: async (value: string, { req }) => {
+        if (!REGEX_USERNAME.test(value)) {
+          throw new Error(MESSAGES.USERNAME_INVALID);
+        }
+
+        const user = await userService.getUserByUsername(value);
+        if (user) {
+          throw new Error(MESSAGES.USERNAME_ALREADY_IN_USE);
+        }
+      }
     }
   },
   avatar: imageUrlValidatorSchema,

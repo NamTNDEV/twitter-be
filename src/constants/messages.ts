@@ -55,13 +55,14 @@ export const MESSAGES = {
   WEBSITE_INVALID: "Invalid website!",
   WEBSITE_LENGTH: "Website must be between 1 and 100 characters long!",
   USERNAME_MUST_BE_A_STRING: "Invalid username!",
-  USERNAME_LENGTH: "Username must be between 1 and 50 characters long!",
+  USERNAME_INVALID: "Username must be 4-15 characters long, contain only letters, numbers, and underscores, and cannot be only numbers!",
   IMAGE_URL_MUST_BE_A_STRING: "Invalid image URL!",
   IMAGE_URL_LENGTH: "Image URL must be between 1 and 400 characters long!",
 
   GET_ME_SUCCESSFUL: "Get me successful!",
   GET_PROFILE_SUCCESSFUL: "Get profile successful!",
   UPDATE_ME_SUCCESSFUL: "Update me successful!",
+  USERNAME_ALREADY_IN_USE: "Username is already in use!",
 
   FOLLOW_SUCCESSFUL: "Follow successful!",
   FOLLOWEE_ID_IS_REQUIRED: "Followee ID is required!",

@@ -4,7 +4,8 @@ import { ObjectId } from 'mongodb';
 import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
-import { FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, UnfollowReqParams, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
+import { ErrorWithStatus } from '~/models/Errors';
+import { FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, UnfollowReqParams, UpdateMeReqBody, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -97,7 +98,7 @@ export const getMeController = async (req: Request, res: Response) => {
   return;
 }
 
-export const updateMeController = async (req: Request, res: Response) => {
+export const updateMeController = async (req: Request<ParamsDictionary, any, UpdateMeReqBody>, res: Response) => {
   const { user_id } = req.decoded_authorization as TokenPayload;
   const { body } = req;
   const result = await userService.updateMe(user_id, body);
@@ -108,6 +109,13 @@ export const updateMeController = async (req: Request, res: Response) => {
 export const getProfileController = async (req: Request<GetProfileReqParams>, res: Response) => {
   const { username } = req.params;
   const user = await userService.getUserByUsername(username);
+  if (!user) {
+    throw new ErrorWithStatus({
+      status: HTTP_STATUS.NOT_FOUND,
+      message: MESSAGES.USER_NOT_FOUND
+    }
+    )
+  }
   res.json({ message: MESSAGES.GET_PROFILE_SUCCESSFUL, result: user });
   return;
 }
