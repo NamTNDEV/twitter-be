@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import path from "path";
 import sharp from "sharp";
+import { checkEnv } from "~/utils/env.ultis";
 import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadSingleImage, ImagesDir } from "~/utils/file";
 
 class MediaService {
@@ -11,8 +12,9 @@ class MediaService {
     const uploadPath = path.resolve(ImagesDir, decoratedFilename);
     await sharp(filepath).jpeg().toFile(uploadPath);
     deleteFileAfterUpload(filepath);
+
     return {
-      uploadedUrl: `${req.protocol}://${req.get("host")}/images/${decoratedFilename}`,
+      uploadedUrl: checkEnv("dev") ? `http://localhost:${process.env.PORT}/uploads/images/${decoratedFilename}` : `${process.env.HOST}/uploads/images/${decoratedFilename}`,
     }
   }
 }

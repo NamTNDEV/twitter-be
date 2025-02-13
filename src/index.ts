@@ -6,8 +6,6 @@ import { config } from 'dotenv';
 import { mediasRoutes } from './routes/medias.routes';
 import { initUploadsDir } from './utils/file';
 
-//Test
-
 config();
 const app = express();
 const PORT = process.env.PORT || 8080;
