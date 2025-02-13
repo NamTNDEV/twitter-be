@@ -20,7 +20,7 @@ export const MESSAGES = {
   CONFIRM_PASSWORD_IS_REQUIRED: "Confirm password is required!",
   CONFIRM_PASSWORD_MUST_BE_STRING: "Confirm password must be a string!",
   CONFIRM_PASSWORD_LENGTH: "Confirm password must be between 6 and 20 characters long!",
-  CONFIRM_PASSWORD_IS_NOT_MATCHED: "Confirm password is not matched!",
+  CONFIRM_PASSWORD_IS_NOT_MATCHED: "Confirm password does not match!",
 
   OLD_PASSWORD_IS_REQUIRED: "Old password is required!",
   OLD_PASSWORD_MUST_BE_STRING: "Old password must be a string!",
@@ -29,8 +29,8 @@ export const MESSAGES = {
 
   USER_NOT_FOUND: "User not found!",
   USER_NOT_VERIFIED: "User not verified!",
-  EMAIL_OR_PASSWORD_INCORRECT: "Email or Password is incorrect!",
-  EMAIL_IS_NOT_FOUND: "Email is not found!",
+  EMAIL_OR_PASSWORD_INCORRECT: "Email or password is incorrect!",
+  EMAIL_IS_NOT_FOUND: "Email not found!",
 
   LOGIN_SUCCESSFUL: "Login successful!",
   REGISTER_SUCCESSFUL: "User registered successfully!",
@@ -79,12 +79,15 @@ export const MESSAGES = {
   FOLLOWEE_ID_INVALID: "Invalid followee ID!",
   FOLLOWEE_NOT_FOUND: "Followee not found!",
   ALREADY_FOLLOWED: "Already following!",
-  CAN_NOT_FOLLOW_YOURSELF: "Can not follow yourself!",
+  CAN_NOT_FOLLOW_YOURSELF: "Cannot follow yourself!",
   UNFOLLOW_SUCCESSFUL: "Unfollow successful!",
   NOT_FOLLOWED_YET: "Not followed yet!",
 
-  OLD_PASSWORD_IS_NOT_MATCHED: "Old password is not matched!",
+  OLD_PASSWORD_IS_NOT_MATCHED: "Old password does not match!",
   NEW_PASSWORD_IS_SAME_AS_OLD_PASSWORD: "New password must be different from the old password",
   CHANGE_PASSWORD_SUCCESSFUL: "Change password successful!",
 
+  FILE_UPLOADED_SUCCESSFUL: "File uploaded successfully!",
+  FILE_UPLOADED_IS_REQUIRED: "File upload is required!",
+  FILE_UPLOAD_NOT_VALID: "File upload is not valid!",
 } as const; 
