@@ -14,7 +14,6 @@ import userService from '~/services/users.services';
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User;
   const { _id: userId, verify } = user;
-  console.log("User::: ", user);
   const { accessToken, refreshToken } = await userService.login({ userId: (userId as ObjectId).toString(), verifyStatus: verify });
   res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGIN_SUCCESSFUL, data: { accessToken, refreshToken } });
   return;
@@ -22,10 +21,28 @@ export const loginController = async (req: Request, res: Response) => {
 
 export const registerController = async (req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response, next: NextFunction) => {
   const newUser = req.body;
-  const createdUser = await userService.createUser(newUser);
+  const createdUser = await userService.register(newUser);
   res.status(201).json({ message: MESSAGES.REGISTER_SUCCESSFUL, data: createdUser });
   return;
 };
+
+export const oauthController = async (req: Request, res: Response) => {
+  const { code } = req.query;
+  if (!code) {
+    res.json({ message: MESSAGES.OAUTH_FAILED });
+    return;
+  }
+  const {
+    accessToken,
+    refreshToken,
+    isNewUser,
+    verifyStatus
+  } = await userService.oauthLogin(code as string);
+
+  const redirectUrl = `${process.env.OAUTH_CLIENT_REDIRECT_CALLBACK}?accessToken=${accessToken}&refreshToken=${refreshToken}&isNewUser=${isNewUser}&verifyStatus=${verifyStatus}`;
+  res.redirect(redirectUrl);
+  return;
+}
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutRequestBody>, res: Response) => {
   const { refresh_token } = req.body;

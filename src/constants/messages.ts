@@ -34,6 +34,9 @@ export const MESSAGES = {
 
   LOGIN_SUCCESSFUL: "Login successful!",
   REGISTER_SUCCESSFUL: "User registered successfully!",
+  OAUTH_SUCCESSFUL: "OAuth successful!",
+  OAUTH_FAILED: "OAuth failed!",
+  GMAIL_NOT_VERIFIED: "Gmail is not verified!",
 
   ACCESS_TOKEN_INVALID: "Invalid access token!",
   ACCESS_TOKEN_IS_REQUIRED: "Access token is required!",
