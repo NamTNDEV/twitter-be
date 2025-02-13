@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
+import { File } from 'formidable';
 import fs from "fs";
 import path from "path";
 import { MESSAGES } from '~/constants/messages';
 
 export const UploadsFileDir = path.resolve('uploads');
+export const TempsFileDir = path.resolve(UploadsFileDir, 'temps');
 export const ImagesDir = path.resolve(UploadsFileDir, 'images');
 export const VideosDir = path.resolve(UploadsFileDir, 'videos');
 
@@ -16,6 +18,7 @@ const formidable = async () => {
 
 export const initUploadsDir = () => {
   if (!fs.existsSync(UploadsFileDir)) {
+    fs.mkdirSync(TempsFileDir, { recursive: true });
     fs.mkdirSync(ImagesDir, { recursive: true });
     fs.mkdirSync(VideosDir, { recursive: true });
   }
@@ -23,7 +26,7 @@ export const initUploadsDir = () => {
 
 export const handleUploadSingleImage = async (req: Request, res: Response) => {
   const form = (await formidable()).default({
-    uploadDir: ImagesDir,
+    uploadDir: TempsFileDir,
     maxFiles: 1,
     maxFileSize: MAX_IMAGE_SIZE,
     keepExtensions: true,
@@ -38,7 +41,7 @@ export const handleUploadSingleImage = async (req: Request, res: Response) => {
     }
   })
 
-  return new Promise((resolve, reject) => {
+  return new Promise<File>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err);
@@ -47,9 +50,19 @@ export const handleUploadSingleImage = async (req: Request, res: Response) => {
       if (Object.keys(files).length === 0) {
         return reject(new Error(MESSAGES.FILE_UPLOADED_IS_REQUIRED));
       }
-
-      const file = files[Object.keys(files)[0]];
-      resolve(file);
+      // const file = (files[Object.keys(files)[0]] as File[])[0];
+      const uploadedFile = (files.image as File[])[0];
+      resolve(uploadedFile);
     })
   });
+}
+
+export const deleteFileAfterUpload = (filepath: string) => {
+  fs.unlinkSync(filepath);
+}
+
+export const getNameWithoutExtension = (filename: string) => {
+  const nameArr = filename.split('.');
+  nameArr.pop();
+  return nameArr.join('');
 }
