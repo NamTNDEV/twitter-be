@@ -4,8 +4,8 @@ import { MESSAGES } from '~/constants/messages';
 import mediaService from '~/services/medias.services';
 import { ImagesDir } from '~/utils/file';
 
-export const uploadSingleImageController = async (req: Request, res: Response) => {
-  const result = await mediaService.uploadSingleImage(req, res);
+export const uploadImageController = async (req: Request, res: Response) => {
+  const result = await mediaService.uploadImage(req, res);
   res.json({
     message: MESSAGES.FILE_UPLOADED_SUCCESSFUL,
     data: result

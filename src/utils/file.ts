@@ -9,8 +9,9 @@ export const TempsFileDir = path.resolve(UploadsFileDir, 'temps');
 export const ImagesDir = path.resolve(UploadsFileDir, 'images');
 export const VideosDir = path.resolve(UploadsFileDir, 'videos');
 
-// Single media upload
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES = 4;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_TOTAL_FILE_SIZE = 4 * 10 * 1024 * 1024; // 20MB
 
 const formidable = async () => {
   return (await import('formidable'));
@@ -24,11 +25,12 @@ export const initUploadsDir = () => {
   }
 }
 
-export const handleUploadSingleImage = async (req: Request, res: Response) => {
+export const handleUploadFile = async (req: Request, res: Response) => {
   const form = (await formidable()).default({
     uploadDir: TempsFileDir,
-    maxFiles: 1,
-    maxFileSize: MAX_IMAGE_SIZE,
+    maxFiles: MAX_FILES,
+    maxFileSize: MAX_FILE_SIZE,
+    maxTotalFileSize: MAX_TOTAL_FILE_SIZE,
     keepExtensions: true,
     filter: ({ name, originalFilename, mimetype }) => {
       const isImage = mimetype?.includes('image/');
@@ -41,7 +43,7 @@ export const handleUploadSingleImage = async (req: Request, res: Response) => {
     }
   })
 
-  return new Promise<File>((resolve, reject) => {
+  return new Promise<File[]>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err);
@@ -51,7 +53,7 @@ export const handleUploadSingleImage = async (req: Request, res: Response) => {
         return reject(new Error(MESSAGES.FILE_UPLOADED_IS_REQUIRED));
       }
       // const file = (files[Object.keys(files)[0]] as File[])[0];
-      const uploadedFile = (files.image as File[])[0];
+      const uploadedFile = files.image as File[];
       resolve(uploadedFile);
     })
   });
