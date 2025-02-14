@@ -14,7 +14,7 @@ class MediaService {
     deleteFileAfterUpload(filepath);
 
     return {
-      uploadedUrl: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/${decoratedFilename}` : `${process.env.HOST}/static/${decoratedFilename}`,
+      uploadedUrl: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/image/${decoratedFilename}` : `${process.env.HOST}/static/image/${decoratedFilename}`,
     }
   }
 }

@@ -90,4 +90,5 @@ export const MESSAGES = {
   FILE_UPLOADED_SUCCESSFUL: "File uploaded successfully!",
   FILE_UPLOADED_IS_REQUIRED: "File upload is required!",
   FILE_UPLOAD_NOT_VALID: "File upload is not valid!",
+  FILE_NOT_FOUND: "File not found!",
 } as const; 

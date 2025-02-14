@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { uploadSingleImage } from "~/controllers/medias.controllers";
+import { uploadSingleImageController } from "~/controllers/medias.controllers";
 import { wrapRequestHandler } from "~/utils/handlers";
 
 export const mediasRoutes = Router();
 
-mediasRoutes.post("/upload-image", wrapRequestHandler(uploadSingleImage));
+mediasRoutes.post("/upload-image", wrapRequestHandler(uploadSingleImageController));
