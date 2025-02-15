@@ -118,3 +118,7 @@ export const getExtension = (filename: string) => {
   const nameArr = filename.split('.');
   return nameArr[nameArr.length - 1];
 }
+
+export const getFileSize = (filePath: string) => {
+  return fs.statSync(filePath).size;
+}
