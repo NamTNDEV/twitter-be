@@ -54,9 +54,9 @@ export const serveStreamingVideoController = (req: Request, res: Response) => {
   const CHUNK_SIZE = 10 ** 6;
 
   const start = Number(range.replace(/\D/g, ''));
-  const end = Math.min(start + CHUNK_SIZE, videoSize);
+  const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
 
-  const contentLength = end - start;
+  const contentLength = end - start + 1;
   const contentType = mime.getType(videoPath) || 'video/*';
 
   const headers = {
