@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changePasswordController, emailVerificationController, followController, forgotPasswordController, getMeController, getProfileController, loginController, logoutController, oauthController, registerController, resendEmailVerificationController, resetPasswordController, unfollowController, updateMeController, verifyForgotPasswordTokenController } from "~/controllers/users.controllers";
+import { changePasswordController, emailVerificationController, followController, forgotPasswordController, getMeController, getProfileController, loginController, logoutController, oauthController, refreshTokenController, registerController, resendEmailVerificationController, resetPasswordController, unfollowController, updateMeController, verifyForgotPasswordTokenController } from "~/controllers/users.controllers";
 import { filterMiddleware } from "~/middlewares/common.middlewares";
 import { accessTokenValidation, changePasswordValidation, emailVerifyTokenValidation, followValidation, forgotPasswordValidation, loginValidation, refreshTokenValidation, registerValidation, resetPasswordValidation, unfollowValidation, updateMeValidation, verifiedUserValidation, verifyForgotPasswordTokenValidation } from "~/middlewares/users.middlewares";
 import { UpdateMeReqBody } from "~/models/requests/user.requests";
@@ -14,6 +14,7 @@ usersRouter.post("/login", loginValidation, loginController);
 usersRouter.post("/register", registerValidation, wrapRequestHandler(registerController));
 usersRouter.get("/oauth/google", wrapRequestHandler(oauthController));
 usersRouter.post("/logout", accessTokenValidation, refreshTokenValidation, wrapRequestHandler(logoutController));
+usersRouter.post("/refresh-token", refreshTokenValidation, wrapRequestHandler(refreshTokenController));
 
 usersRouter.post("/verify-email", emailVerifyTokenValidation, wrapRequestHandler(emailVerificationController));
 usersRouter.post("/resend-verify-email", accessTokenValidation, wrapRequestHandler(resendEmailVerificationController));

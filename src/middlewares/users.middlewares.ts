@@ -12,8 +12,6 @@ import { hashPassword } from "~/utils/crypto";
 import { verifyToken } from "~/utils/jwt";
 import { validate } from "~/utils/validation";
 import { Request as RequestExpress } from "express";
-import emailService from "~/services/email.services";
-import { User } from '~/models/schemas/User.schemas';
 import { UserVerifyStatus } from '~/constants/enums';
 import { TokenPayload } from '~/models/requests/user.requests';
 import { ObjectId } from 'mongodb';

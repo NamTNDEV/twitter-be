@@ -5,7 +5,7 @@ import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
 import { ErrorWithStatus } from '~/models/Errors';
-import { ChangePasswordReqBody, FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, UnfollowReqParams, UpdateMeReqBody, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
+import { ChangePasswordReqBody, FollowReqBody, ForgotPasswordReqBody, GetProfileReqParams, LogoutRequestBody, RefreshTokenReqBody, RegisterReqBody, ResetPasswordReqBody, TokenPayload, UnfollowReqParams, UpdateMeReqBody, VerifyEmailBody, VerifyForgotPasswordTokenReqBody } from '~/models/requests/user.requests';
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
@@ -25,6 +25,13 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
   res.status(201).json({ message: MESSAGES.REGISTER_SUCCESSFUL, data: createdUser });
   return;
 };
+
+export const refreshTokenController = async (req: Request<ParamsDictionary, any, RefreshTokenReqBody>, res: Response) => {
+  const { refresh_token } = req.body;
+  const { user_id, verify_status } = req.decoded_refresh_token as TokenPayload;
+  const { accessToken, refreshToken } = await userService.refreshToken({ userId: user_id, refreshToken: refresh_token, verifyStatus: verify_status });
+  res.json({ message: MESSAGES.REFRESH_TOKEN_SUCCESSFUL, result: { accessToken, refreshToken } });
+}
 
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query;

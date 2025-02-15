@@ -134,6 +134,14 @@ class UserService {
     };
   }
 
+  public async refreshToken({ userId, refreshToken, verifyStatus }: { userId: string, refreshToken: string, verifyStatus: UserVerifyStatus }) {
+    const [accessToken, newRefreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus });
+    await authService.saveRefreshToken(userId, newRefreshToken);
+    await authService.deleteRefreshToken(refreshToken);
+
+    return { accessToken, refreshToken: newRefreshToken };
+  }
+
   public async checkEmailIsInUse(email: string) {
     const user = await db.getUserCollection().findOne({ email });
     return !!user;

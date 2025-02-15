@@ -43,6 +43,7 @@ export const MESSAGES = {
   REFRESH_TOKEN_INVALID: "Invalid refresh token!",
   REFRESH_TOKEN_IS_REQUIRED: "Refresh token is required!",
   REFRESH_TOKEN_NOT_FOUND: "Refresh token not found!",
+  REFRESH_TOKEN_SUCCESSFUL: "Refresh token successful!",
 
   LOGOUT_SUCCESSFUL: "Logout successful!",
 
