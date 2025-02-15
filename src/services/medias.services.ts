@@ -4,16 +4,16 @@ import sharp from "sharp";
 import { MediaType } from "~/constants/enums";
 import { Media } from "~/models/Other";
 import { checkEnv } from "~/utils/env.ultis";
-import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadFile, ImagesDir } from "~/utils/file";
+import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, imagesPath, } from "~/utils/file";
 
 class MediaService {
-  public async uploadImage(req: Request, res: Response) {
-    const files = await handleUploadFile(req, res);
+  public async uploadImages(req: Request, res: Response) {
+    const files = await handleUploadImages(req, res);
     const result: Media[] = await Promise.all(
       files.map(async file => {
         const newNameFile = getNameWithoutExtension(file.newFilename);
         const decoratedFilename = `${newNameFile}.jpg`;
-        const uploadPath = path.resolve(ImagesDir, decoratedFilename);
+        const uploadPath = path.resolve(imagesPath, decoratedFilename);
         await sharp(file.filepath).jpeg().toFile(uploadPath);
         deleteFileAfterUpload(file.filepath);
         return {
@@ -23,6 +23,17 @@ class MediaService {
       })
     );
 
+    return result;
+  }
+
+  public async uploadVideo(req: Request, res: Response) {
+    const uploadedVideos = await handleUploadVideo(req, res);
+    const result = uploadedVideos.map(file => {
+      return {
+        url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video/${file.newFilename}` : `${process.env.HOST}/static/video/${file.newFilename}`,
+        type: MediaType.Video
+      }
+    })
     return result;
   }
 }

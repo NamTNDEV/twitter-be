@@ -4,8 +4,8 @@ import db from './configs/db.configs';
 import { defaultErrorHandler } from './middlewares/errors.middlewares';
 import { config } from 'dotenv';
 import { mediasRoutes } from './routes/medias.routes';
-import { ImagesDir, initUploadsDir, UploadsFileDir, VideosDir } from './utils/file';
 import { staticRoutes } from './routes/static.routes';
+import { initUploadsDir } from './utils/file';
 
 config();
 const app = express();
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 db.connect();
 
 // app.use('/static', express.static(ImagesDir));
-app.use(express.static(VideosDir));
+// app.use(express.static(VideosDir));
 
 app.use('/users', usersRouter);
 app.use('/medias', mediasRoutes);

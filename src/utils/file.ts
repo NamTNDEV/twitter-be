@@ -3,31 +3,37 @@ import { File } from 'formidable';
 import fs from "fs";
 import path from "path";
 import { MESSAGES } from '~/constants/messages';
+export const uploadsPath = path.resolve('uploads');
+export const imagesPath = path.resolve(uploadsPath, 'images');
+export const videosPath = path.resolve(uploadsPath, 'videos');
+export const imageTempPath = path.resolve(imagesPath, 'temps');
+export const videoTempPath = path.resolve(videosPath, 'temps');
 
-export const UploadsFileDir = path.resolve('uploads');
-export const TempsFileDir = path.resolve(UploadsFileDir, 'temps');
-export const ImagesDir = path.resolve(UploadsFileDir, 'images');
-export const VideosDir = path.resolve(UploadsFileDir, 'videos');
-
+// Image Upload 
 const MAX_FILES = 4;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_TOTAL_FILE_SIZE = 4 * 10 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_TOTAL_FILE_SIZE = MAX_FILES * MAX_FILE_SIZE;
+
+// Video Upload
+const MAX_VIDEO_FILES = 1;
+const MAX_VIDEO_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_TOTAL_VIDEO_FILE_SIZE = MAX_VIDEO_FILES * MAX_VIDEO_FILE_SIZE;
 
 const formidable = async () => {
   return (await import('formidable'));
 }
 
 export const initUploadsDir = () => {
-  if (!fs.existsSync(UploadsFileDir)) {
-    fs.mkdirSync(TempsFileDir, { recursive: true });
-    fs.mkdirSync(ImagesDir, { recursive: true });
-    fs.mkdirSync(VideosDir, { recursive: true });
+  if (!fs.existsSync(uploadsPath)) {
+    [imagesPath, videosPath, imageTempPath, videoTempPath].forEach(dir => {
+      fs.mkdirSync(dir, { recursive: true });
+    });
   }
 }
 
-export const handleUploadFile = async (req: Request, res: Response) => {
+export const handleUploadImages = async (req: Request, res: Response) => {
   const form = (await formidable()).default({
-    uploadDir: TempsFileDir,
+    uploadDir: imageTempPath,
     maxFiles: MAX_FILES,
     maxFileSize: MAX_FILE_SIZE,
     maxTotalFileSize: MAX_TOTAL_FILE_SIZE,
@@ -53,18 +59,62 @@ export const handleUploadFile = async (req: Request, res: Response) => {
         return reject(new Error(MESSAGES.FILE_UPLOADED_IS_REQUIRED));
       }
       // const file = (files[Object.keys(files)[0]] as File[])[0];
-      const uploadedFile = files.image as File[];
-      resolve(uploadedFile);
+      const uploadedImages = files.image as File[];
+      resolve(uploadedImages);
     })
   });
 }
 
-export const deleteFileAfterUpload = (filepath: string) => {
-  fs.unlinkSync(filepath);
+export const handleUploadVideo = async (req: Request, res: Response) => {
+  const form = (await formidable()).default({
+    uploadDir: videosPath,
+    maxFiles: MAX_VIDEO_FILES,
+    maxFileSize: MAX_VIDEO_FILE_SIZE,
+    // keepExtensions: true,
+    filter: ({ name, originalFilename, mimetype }) => {
+      // const isVideo = mimetype?.includes('video/');
+      // const uploadedKey = name === 'video';
+      // const isValid = isVideo && uploadedKey;
+      // if (!isValid) {
+      //   form.emit('error' as any, new Error(MESSAGES.FILE_UPLOAD_NOT_VALID) as any);
+      // }
+      // return Boolean(isValid);
+      return true;
+    }
+  })
+
+  return new Promise<File[]>((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      if (Object.keys(files).length === 0) {
+        return reject(new Error(MESSAGES.FILE_UPLOADED_IS_REQUIRED));
+      }
+
+      const uploadedVideos = files.video as File[];
+      uploadedVideos.forEach(video => {
+        const extension = getExtension(video.originalFilename as string);
+        fs.renameSync(video.filepath, `${video.filepath}.${extension}`);
+        video.newFilename = `${video.newFilename}.${extension}`;
+      });
+      resolve(uploadedVideos);
+    })
+  });
+}
+
+export const deleteFileAfterUpload = (filePath: string) => {
+  fs.unlinkSync(filePath);
 }
 
 export const getNameWithoutExtension = (filename: string) => {
   const nameArr = filename.split('.');
   nameArr.pop();
   return nameArr.join('');
+}
+
+export const getExtension = (filename: string) => {
+  const nameArr = filename.split('.');
+  return nameArr[nameArr.length - 1];
 }

@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { uploadImageController } from "~/controllers/medias.controllers";
+import { uploadImagesController, uploadVideoController } from "~/controllers/medias.controllers";
+import { accessTokenValidation, verifiedUserValidation } from "~/middlewares/users.middlewares";
 import { wrapRequestHandler } from "~/utils/handlers";
 
 export const mediasRoutes = Router();
 
-mediasRoutes.post("/upload-image", wrapRequestHandler(uploadImageController));
+mediasRoutes.post("/upload-images", accessTokenValidation, verifiedUserValidation, wrapRequestHandler(uploadImagesController));
+mediasRoutes.post("/upload-video", accessTokenValidation, verifiedUserValidation, wrapRequestHandler(uploadVideoController));
