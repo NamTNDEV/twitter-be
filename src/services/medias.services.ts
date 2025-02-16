@@ -5,8 +5,10 @@ import { MediaType } from "~/constants/enums";
 import { Media } from "~/models/Other";
 import { checkEnv } from "~/utils/env.ultis";
 import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, handleUploadVideoHls, imagesPath, } from "~/utils/file";
+import { Queue } from "~/utils/queue";
 import { encodeHLSWithMultipleVideoStreams } from "~/utils/video";
 
+const queue = Queue.getInstance();
 class MediaService {
   public async uploadImages(req: Request, res: Response) {
     const files = await handleUploadImages(req, res);
@@ -42,9 +44,10 @@ class MediaService {
     const uploadedVideos = await handleUploadVideoHls(req, res);
     const result: Media[] = await Promise.all(
       uploadedVideos.map(async video => {
-        await encodeHLSWithMultipleVideoStreams(video.filepath);
-        await deleteFileAfterUpload(video.filepath);
         const newNameFile = getNameWithoutExtension(video.newFilename);
+        // await encodeHLSWithMultipleVideoStreams(video.filepath);
+        // await deleteFileAfterUpload(video.filepath);
+        queue.enqueue(video.filepath);
         return {
           url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}/master.m3u8` : `${process.env.HOST}/static/video/${newNameFile}/master.m3u8`,
           type: MediaType.Video
