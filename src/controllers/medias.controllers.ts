@@ -45,6 +45,28 @@ export const serveImageController = (req: Request, res: Response) => {
   });
 }
 
+export const serveM3U8Controller = (req: Request, res: Response) => {
+  const { id } = req.params;
+  return res.sendFile(path.resolve(videosPath, id, 'master.m3u8'), (err) => {
+    if (err) {
+      res.status((err as any).status).json({
+        message: MESSAGES.FILE_NOT_FOUND
+      });
+    }
+  });
+}
+
+export const serveSegmentController = (req: Request, res: Response) => {
+  const { id, v, segment } = req.params;
+  return res.sendFile(path.resolve(videosPath, id, v, segment), (err) => {
+    if (err) {
+      res.status((err as any).status).json({
+        message: MESSAGES.FILE_NOT_FOUND
+      });
+    }
+  });
+}
+
 export const serveStreamingVideoController = (req: Request, res: Response) => {
   const range = req.headers.range;
   if (!range) {

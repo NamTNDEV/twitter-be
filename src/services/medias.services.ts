@@ -46,7 +46,7 @@ class MediaService {
         await deleteFileAfterUpload(video.filepath);
         const newNameFile = getNameWithoutExtension(video.newFilename);
         return {
-          url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}` : `${process.env.HOST}/static/video/${newNameFile}`,
+          url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}/master.m3u8` : `${process.env.HOST}/static/video/${newNameFile}/master.m3u8`,
           type: MediaType.Video
         }
       })

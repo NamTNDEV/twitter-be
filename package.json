@@ -16,10 +16,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/cors": "^2.8.17",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/lodash": "^4.17.14",
     "@types/minimist": "^1.2.5",
     "axios": "^1.7.9",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-validator": "^7.2.1",

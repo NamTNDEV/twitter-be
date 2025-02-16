@@ -6,6 +6,7 @@ import { config } from 'dotenv';
 import { mediasRoutes } from './routes/medias.routes';
 import { staticRoutes } from './routes/static.routes';
 import { initUploadsDir } from './utils/file';
+import cors from 'cors';
 
 config();
 const app = express();
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 8080;
 
 initUploadsDir();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 db.connect();
