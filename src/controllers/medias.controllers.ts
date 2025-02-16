@@ -25,6 +25,15 @@ export const uploadVideoController = async (req: Request, res: Response) => {
   return;
 }
 
+export const uploadVideoHlsController = async (req: Request, res: Response) => {
+  const result = await mediaService.uploadVideoHls(req, res);
+  res.json({
+    message: MESSAGES.FILE_UPLOADED_SUCCESSFUL,
+    data: result
+  });
+  return;
+}
+
 export const serveImageController = (req: Request, res: Response) => {
   const { file_name } = req.params;
   return res.sendFile(path.resolve(imagesPath, file_name), (err) => {

@@ -3,6 +3,7 @@ import { File } from 'formidable';
 import fs from "fs";
 import path from "path";
 import { MESSAGES } from '~/constants/messages';
+
 export const uploadsPath = path.resolve('uploads');
 export const imagesPath = path.resolve(uploadsPath, 'images');
 export const videosPath = path.resolve(uploadsPath, 'videos');
@@ -21,6 +22,9 @@ const MAX_TOTAL_VIDEO_FILE_SIZE = MAX_VIDEO_FILES * MAX_VIDEO_FILE_SIZE;
 
 const formidable = async () => {
   return (await import('formidable'));
+}
+const nanoid = async () => {
+  return (await import('nanoid'));
 }
 
 export const initUploadsDir = () => {
@@ -66,20 +70,23 @@ export const handleUploadImages = async (req: Request, res: Response) => {
 }
 
 export const handleUploadVideo = async (req: Request, res: Response) => {
+  const idName = (await nanoid()).nanoid();
   const form = (await formidable()).default({
     uploadDir: videosPath,
     maxFiles: MAX_VIDEO_FILES,
     maxFileSize: MAX_VIDEO_FILE_SIZE,
     // keepExtensions: true,
     filter: ({ name, originalFilename, mimetype }) => {
-      // const isVideo = mimetype?.includes('video/');
-      // const uploadedKey = name === 'video';
-      // const isValid = isVideo && uploadedKey;
-      // if (!isValid) {
-      //   form.emit('error' as any, new Error(MESSAGES.FILE_UPLOAD_NOT_VALID) as any);
-      // }
-      // return Boolean(isValid);
-      return true;
+      const isVideo = mimetype?.includes('mp4') || mimetype?.includes('quicktime');
+      const uploadedKey = name === 'video';
+      const isValid = isVideo && uploadedKey;
+      if (!isValid) {
+        form.emit('error' as any, new Error(MESSAGES.FILE_UPLOAD_NOT_VALID) as any);
+      }
+      return Boolean(isValid);
+    },
+    filename: () => {
+      return idName;
     }
   })
 
@@ -98,6 +105,53 @@ export const handleUploadVideo = async (req: Request, res: Response) => {
         const extension = getExtension(video.originalFilename as string);
         fs.renameSync(video.filepath, `${video.filepath}.${extension}`);
         video.newFilename = `${video.newFilename}.${extension}`;
+        video.filepath = `${video.filepath}.${extension}`;
+      });
+      resolve(uploadedVideos);
+    })
+  });
+}
+
+export const handleUploadVideoHls = async (req: Request, res: Response) => {
+  const idName = (await nanoid()).nanoid();
+  const folderPath = path.resolve(videosPath, idName);
+  fs.mkdirSync(folderPath, { recursive: true });
+  const form = (await formidable()).default({
+    uploadDir: folderPath,
+    maxFiles: MAX_VIDEO_FILES,
+    maxFileSize: MAX_VIDEO_FILE_SIZE,
+    // keepExtensions: true,
+    filter: ({ name, originalFilename, mimetype }) => {
+      const isVideo = mimetype?.includes('mp4') || mimetype?.includes('quicktime');
+      const uploadedKey = name === 'video';
+      const isValid = isVideo && uploadedKey;
+      if (!isValid) {
+        form.emit('error' as any, new Error(MESSAGES.FILE_UPLOAD_NOT_VALID) as any);
+      }
+      return Boolean(isValid);
+    },
+    filename: () => {
+      return idName;
+    }
+
+  })
+
+  return new Promise<File[]>((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      if (Object.keys(files).length === 0) {
+        return reject(new Error(MESSAGES.FILE_UPLOADED_IS_REQUIRED));
+      }
+
+      const uploadedVideos = files.video as File[];
+      uploadedVideos.forEach(video => {
+        const extension = getExtension(video.originalFilename as string);
+        fs.renameSync(video.filepath, `${video.filepath}.${extension}`);
+        video.newFilename = `${video.newFilename}.${extension}`;
+        video.filepath = `${video.filepath}.${extension}`;
       });
       resolve(uploadedVideos);
     })

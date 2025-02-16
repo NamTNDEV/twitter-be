@@ -4,7 +4,8 @@ import sharp from "sharp";
 import { MediaType } from "~/constants/enums";
 import { Media } from "~/models/Other";
 import { checkEnv } from "~/utils/env.ultis";
-import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, imagesPath, } from "~/utils/file";
+import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, handleUploadVideoHls, imagesPath, } from "~/utils/file";
+import { encodeHLSWithMultipleVideoStreams } from "~/utils/video";
 
 class MediaService {
   public async uploadImages(req: Request, res: Response) {
@@ -28,12 +29,28 @@ class MediaService {
 
   public async uploadVideo(req: Request, res: Response) {
     const uploadedVideos = await handleUploadVideo(req, res);
-    const result = uploadedVideos.map(file => {
+    const result: Media[] = uploadedVideos.map(file => {
       return {
         url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video/${file.newFilename}` : `${process.env.HOST}/static/video/${file.newFilename}`,
         type: MediaType.Video
       }
     })
+    return result;
+  }
+
+  public async uploadVideoHls(req: Request, res: Response) {
+    const uploadedVideos = await handleUploadVideoHls(req, res);
+    const result: Media[] = await Promise.all(
+      uploadedVideos.map(async video => {
+        await encodeHLSWithMultipleVideoStreams(video.filepath);
+        await deleteFileAfterUpload(video.filepath);
+        const newNameFile = getNameWithoutExtension(video.newFilename);
+        return {
+          url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}` : `${process.env.HOST}/static/video/${newNameFile}`,
+          type: MediaType.Video
+        }
+      })
+    );
     return result;
   }
 }
