@@ -1,5 +1,8 @@
-import { deleteFileAfterUpload } from "./file";
+import { deleteFileAfterUpload, getNameWithoutExtension } from "./file";
 import { encodeHLSWithMultipleVideoStreams } from "./video";
+import VideoStatus from "~/models/schemas/VideoStatus.schemas";
+import { EncodingStatus } from "~/constants/enums";
+import mediaService from "~/services/medias.services";
 
 export class Queue {
   private static instance: Queue;
@@ -15,8 +18,15 @@ export class Queue {
     return Queue.instance;
   }
 
-  public enqueue(item: string) {
+  public async enqueue(item: string) {
     this.items.push(item);
+
+    const idName = getNameWithoutExtension(item.split("/").pop() || "");
+    await mediaService.addNewVideoStatus(new VideoStatus({
+      name: idName,
+      status: EncodingStatus.Pending
+    }));
+
     this.processEncoding();
   }
 
@@ -29,14 +39,20 @@ export class Queue {
 
     this.isEncoding = true;
     const videoPath = this.items.shift();
+    const idName = getNameWithoutExtension((videoPath as string).split("/").pop() || "");
     if (!videoPath) return;
 
     try {
+      await mediaService.updateVideoStatus(idName, EncodingStatus.Processing);
       console.log(`🚀 Encoding started: ${videoPath}`);
       await encodeHLSWithMultipleVideoStreams(videoPath);
       await deleteFileAfterUpload(videoPath);
+      await mediaService.updateVideoStatus(idName, EncodingStatus.Completed);
       console.log(`✅ Encoding success: ${videoPath}`);
     } catch (error) {
+      await mediaService.updateVideoStatus(idName, EncodingStatus.Failed).catch(
+        (error) => console.error(`❌ Update status error: ${videoPath}`, error)
+      );
       console.error(`❌ Encoding error: ${videoPath}`, error);
     }
 

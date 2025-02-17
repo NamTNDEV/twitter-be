@@ -94,4 +94,6 @@ export const MESSAGES = {
   FILE_NOT_FOUND: "File not found!",
 
   RANGE_NOT_PROVIDED: "Range not provided!",
+
+  GET_VIDEO_STATUS_SUCCESSFUL: "Get video status successful!",
 } as const; 

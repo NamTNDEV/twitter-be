@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import path from "path";
 import sharp from "sharp";
-import { MediaType } from "~/constants/enums";
+import db from "~/configs/db.configs";
+import { EncodingStatus, MediaType } from "~/constants/enums";
 import { Media } from "~/models/Other";
+import VideoStatus from "~/models/schemas/VideoStatus.schemas";
 import { checkEnv } from "~/utils/env.ultis";
 import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, handleUploadVideoHls, imagesPath, } from "~/utils/file";
 import { Queue } from "~/utils/queue";
@@ -56,6 +58,19 @@ class MediaService {
     );
     return result;
   }
+
+  public async addNewVideoStatus(newVideStatus: VideoStatus) {
+    await db.getVideoStatusCollection().insertOne(newVideStatus);
+  }
+
+  public async updateVideoStatus(videoId: string, newStatus: EncodingStatus) {
+    await db.getVideoStatusCollection().updateOne({ name: videoId }, { $set: { status: newStatus }, $currentDate: { updatedAt: true } });
+  }
+
+  public async getVideoStatus(videoId: string) {
+    return await db.getVideoStatusCollection().findOne({ name: videoId });
+  }
+
 }
 
 const mediaService = new MediaService();
