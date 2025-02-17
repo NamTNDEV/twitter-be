@@ -35,7 +35,18 @@ class AuthService {
     });
   }
 
-  public async signRefreshToken({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }): Promise<string> {
+  public async signRefreshToken({ userId, verifyStatus, exp }: { userId: string, verifyStatus: UserVerifyStatus, exp?: number }): Promise<string> {
+    if (exp) {
+      return await signToken({
+        payload: {
+          user_id: userId,
+          token_type: TokenTypes.RefreshToken,
+          verify_status: verifyStatus,
+          exp
+        },
+        privateKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string,
+      });
+    }
     return await signToken({
       payload: {
         user_id: userId,
@@ -49,14 +60,16 @@ class AuthService {
     });
   }
 
-  public signPairOfJwtTokens({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
-    return Promise.all([this.signAccessToken({ userId, verifyStatus }), this.signRefreshToken({ userId, verifyStatus })]);
+  public signPairOfJwtTokens({ userId, verifyStatus, exp }: { userId: string, verifyStatus: UserVerifyStatus, exp?: number }) {
+    return Promise.all([this.signAccessToken({ userId, verifyStatus }), this.signRefreshToken({ userId, verifyStatus, exp })]);
   }
 
-  public async saveRefreshToken(userId: string, refreshToken: string) {
+  public async saveRefreshToken(userId: string, refreshToken: string, exp: number, iat: number) {
     await db.getRefreshTokenCollection().insertOne(new RefreshToken({
       userId: new ObjectId(userId),
-      token: refreshToken
+      token: refreshToken,
+      exp: exp,
+      iat: iat
     }))
   }
 

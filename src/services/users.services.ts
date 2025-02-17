@@ -11,6 +11,7 @@ import { HTTP_STATUS } from "~/constants/httpStatus";
 import { MESSAGES } from "~/constants/messages";
 import Follower from "~/models/schemas/Follower.schemas";
 import axios from "axios";
+import { verifyToken } from "~/utils/jwt";
 
 export interface OAuthGoogleTokenResType {
   access_token: string;
@@ -62,7 +63,8 @@ class UserService {
 
   public async login({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
     const [accessToken, refreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus });
-    await authService.saveRefreshToken(userId, refreshToken);
+    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    await authService.saveRefreshToken(userId, refreshToken, exp, iat);
     return { accessToken, refreshToken };
   }
 
@@ -126,17 +128,18 @@ class UserService {
         verifyStatus: UserVerifyStatus.Unverified
       }
     );
-
-    await authService.saveRefreshToken(userId.toString(), refreshToken);
+    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    await authService.saveRefreshToken(userId.toString(), refreshToken, exp, iat);
     return {
       accessToken,
       refreshToken
     };
   }
 
-  public async refreshToken({ userId, refreshToken, verifyStatus }: { userId: string, refreshToken: string, verifyStatus: UserVerifyStatus }) {
-    const [accessToken, newRefreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus });
-    await authService.saveRefreshToken(userId, newRefreshToken);
+  public async refreshToken({ userId, refreshToken, verifyStatus, exp }: { userId: string, refreshToken: string, verifyStatus: UserVerifyStatus, exp: number }) {
+    const [accessToken, newRefreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus, exp });
+    const decoded_refresh_token = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    await authService.saveRefreshToken(userId, newRefreshToken, decoded_refresh_token.exp, decoded_refresh_token.iat);
     await authService.deleteRefreshToken(refreshToken);
 
     return { accessToken, refreshToken: newRefreshToken };
@@ -182,7 +185,8 @@ class UserService {
     ]);
 
     const [accessToken, refreshToken] = pairOfTokens;
-    await authService.saveRefreshToken(userId, refreshToken);
+    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    await authService.saveRefreshToken(userId, refreshToken, exp, iat);
 
     return {
       accessToken,

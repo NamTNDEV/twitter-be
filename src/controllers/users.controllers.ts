@@ -28,8 +28,8 @@ export const registerController = async (req: Request<ParamsDictionary, any, Reg
 
 export const refreshTokenController = async (req: Request<ParamsDictionary, any, RefreshTokenReqBody>, res: Response) => {
   const { refresh_token } = req.body;
-  const { user_id, verify_status } = req.decoded_refresh_token as TokenPayload;
-  const { accessToken, refreshToken } = await userService.refreshToken({ userId: user_id, refreshToken: refresh_token, verifyStatus: verify_status });
+  const { user_id, verify_status, exp } = req.decoded_refresh_token as TokenPayload;
+  const { accessToken, refreshToken } = await userService.refreshToken({ userId: user_id, refreshToken: refresh_token, verifyStatus: verify_status, exp });
   res.json({ message: MESSAGES.REFRESH_TOKEN_SUCCESSFUL, result: { accessToken, refreshToken } });
 }
 
