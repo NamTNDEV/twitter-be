@@ -66,21 +66,33 @@ class Database {
   }
 
   async indexUserCollection() {
+    const isIndexExists = await this.getUserCollection().indexExists(['email_1', 'username_1', 'email_1_password_1']);
+    console.log('Is indexUserCollection exists:', isIndexExists);
+    if (isIndexExists) return;
     await this.getUserCollection().createIndex({ email: 1 }, { unique: true });
     await this.getUserCollection().createIndex({ username: 1 }, { unique: true });
     await this.getUserCollection().createIndex({ email: 1, password: 1 });
   }
 
   async indexRefreshTokenCollection() {
+    const isIndexExists = await this.getRefreshTokenCollection().indexExists(['token_1', 'exp_1']);
+    console.log('Is indexRefreshTokenCollection exists:', isIndexExists);
+    if (isIndexExists) return;
     await this.getRefreshTokenCollection().createIndex({ token: 1 });
     await this.getRefreshTokenCollection().createIndex({ exp: 1 }, { expireAfterSeconds: 0 });
   }
 
   async indexVideoStatusCollection() {
+    const isIndexExists = await this.getVideoStatusCollection().indexExists(['name_1']);
+    console.log('Is indexVideoStatusCollection exists:', isIndexExists);
+    if (isIndexExists) return;
     await this.getVideoStatusCollection().createIndex({ name: 1 });
   }
 
   async indexFollowersCollection() {
+    const isIndexExists = await this.getFollowersCollection().indexExists(['userId_1_followeeId_1']);
+    console.log('Is indexFollowersCollection exists:', isIndexExists);
+    if (isIndexExists) return;
     await this.getFollowersCollection().createIndex({ userId: 1, followeeId: 1 });
   }
 
