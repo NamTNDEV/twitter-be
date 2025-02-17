@@ -17,7 +17,7 @@ initUploadsDir();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-db.connect();
+db.initialize();
 
 // app.use('/static', express.static(ImagesDir));
 // app.use(express.static(VideosDir));

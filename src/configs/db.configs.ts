@@ -26,9 +26,9 @@ class Database {
   async connect() {
     try {
       await this.client.db(`${process.env.DB_USERNAME}`).command({ ping: 1 });
-      console.log(':::Connected to MongoDB:::');
+      console.log('✅ Connected to MongoDB');
     } catch (error) {
-      console.log(':::Error connecting to MongoDB:::', error);
+      console.error('❌ connecting to MongoDB::: ', error);
     }
   }
 
@@ -63,6 +63,31 @@ class Database {
 
   getCollection(collectionName: string) {
     return this.client.db(`${process.env.DB_NAME}`).collection(collectionName);
+  }
+
+  async indexUserCollection() {
+    await this.getUserCollection().createIndex({ email: 1 }, { unique: true });
+    await this.getUserCollection().createIndex({ username: 1 }, { unique: true });
+    await this.getUserCollection().createIndex({ email: 1, password: 1 });
+  }
+
+  async ensureIndexes() {
+    try {
+      console.log(":::Creating indexes:::");
+      await this.indexUserCollection();
+      console.log("✅ Indexes created successfully!");
+    } catch (error) {
+      console.error("❌ Error creating indexes:", error);
+    }
+  }
+
+  async initialize() {
+    try {
+      await this.connect();
+      await this.ensureIndexes();
+    } catch (error) {
+      console.error("❌ Error initializing database:", error);
+    }
   }
 }
 
