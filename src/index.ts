@@ -7,6 +7,7 @@ import { mediasRoutes } from './routes/medias.routes';
 import { staticRoutes } from './routes/static.routes';
 import { initUploadsDir } from './utils/file';
 import cors from 'cors';
+import { tweetsRouter } from './routes/tweet.routes';
 
 config();
 const app = express();
@@ -25,6 +26,7 @@ db.initialize();
 app.use('/users', usersRouter);
 app.use('/medias', mediasRoutes);
 app.use('/static', staticRoutes);
+app.use('/tweets', tweetsRouter);
 app.use(defaultErrorHandler);
 
 app.listen(PORT, () => {

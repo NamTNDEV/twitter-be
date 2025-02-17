@@ -96,4 +96,19 @@ export const MESSAGES = {
   RANGE_NOT_PROVIDED: "Range not provided!",
 
   GET_VIDEO_STATUS_SUCCESSFUL: "Get video status successful!",
-} as const; 
+} as const;
+
+export const TWEET_MESSAGES = {
+  POSTED_SUCCESSFUL: "Tweet posted successfully!",
+  TYPE_IS_REQUIRED: "Tweet type is required!",
+  TYPE_INVALID: "Invalid tweet type!",
+  AUDIENCE_IS_REQUIRED: "Audience is required!",
+  AUDIENCE_INVALID: "Invalid audience!",
+  PARENT_TWEET_ID_INVALID: "Invalid parent tweet ID!",
+  PARENT_TWEET_ID_MUST_BE_NULL: "Parent tweet ID must be null!",
+  CONTENT_IS_REQUIRED: "Content is required!",
+  CONTENT_MUST_BE_NULL: "Content must be null!",
+  HASHTAGS_INVALID: "Invalid hashtag. Hashtag must be an array of strings!",
+  MENTIONS_INVALID: "Invalid mention. Mention must be an array of User IDs!",
+  MEDIAS_INVALID: "Invalid media. Media must be an array of Media objects!",
+} as const;

@@ -3,6 +3,7 @@ import { TweetAudience, TweetType } from "~/constants/enums";
 import { Media } from "../Other";
 
 interface TweetSchemaType {
+  _id?: ObjectId;
   user_id: ObjectId;
   type: TweetType;
   audience: TweetAudience;
@@ -33,6 +34,7 @@ export default class Tweet {
   updated_at: Date;
 
   constructor(tweet: TweetSchemaType) {
+    this._id = tweet._id;
     this.user_id = tweet.user_id;
     this.type = tweet.type;
     this.audience = tweet.audience;
