@@ -71,10 +71,26 @@ class Database {
     await this.getUserCollection().createIndex({ email: 1, password: 1 });
   }
 
+  async indexRefreshTokenCollection() {
+    await this.getRefreshTokenCollection().createIndex({ token: 1 });
+    await this.getRefreshTokenCollection().createIndex({ exp: 1 }, { expireAfterSeconds: 0 });
+  }
+
+  async indexVideoStatusCollection() {
+    await this.getVideoStatusCollection().createIndex({ name: 1 });
+  }
+
+  async indexFollowersCollection() {
+    await this.getFollowersCollection().createIndex({ userId: 1, followeeId: 1 });
+  }
+
   async ensureIndexes() {
     try {
       console.log(":::Creating indexes:::");
       await this.indexUserCollection();
+      await this.indexRefreshTokenCollection();
+      await this.indexVideoStatusCollection();
+      await this.indexFollowersCollection();
       console.log("✅ Indexes created successfully!");
     } catch (error) {
       console.error("❌ Error creating indexes:", error);
