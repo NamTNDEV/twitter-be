@@ -6,6 +6,8 @@ import Follower from '~/models/schemas/Follower.schemas';
 import VideoStatus from '~/models/schemas/VideoStatus.schemas';
 import Tweet from '~/models/schemas/Tweet.schemas';
 import Hashtag from '~/models/schemas/Hashtag';
+import Bookmark from '~/models/schemas/Bookmark.schemas';
+import Like from '~/models/schemas/Like.schemas';
 
 dotenv.config();
 const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
@@ -69,6 +71,14 @@ class Database {
 
   getHashtagCollection(): Collection<Hashtag> {
     return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_HASH_TAGS}`);
+  }
+
+  getBookmarkCollection(): Collection<Bookmark> {
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_BOOKMARKS}`);
+  }
+
+  getLikeCollection(): Collection<Like> {
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_LIKES}`);
   }
 
   getCollection(collectionName: string) {

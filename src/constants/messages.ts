@@ -112,3 +112,21 @@ export const TWEET_MESSAGES = {
   MENTIONS_INVALID: "Invalid mention. Mention must be an array of User IDs!",
   MEDIAS_INVALID: "Invalid media. Media must be an array of Media objects!",
 } as const;
+
+export const BOOKMARK_MESSAGES = {
+  BOOKMARK_CREATED: "Bookmark created successfully!",
+  BOOKMARK_DELETED: "Bookmark deleted successfully!",
+  TWEET_ID_IS_REQUIRED: "Tweet ID is required!",
+  TWEET_ID_INVALID: "Invalid tweet ID!",
+  ALREADY_BOOKMARKED: "Already bookmarked!",
+  NOT_BOOKMARKED_YET: "Not bookmarked yet!",
+}
+
+export const LIKE_MESSAGES = {
+  LIKE_CREATED: "Like created successfully!",
+  LIKE_DELETED: "Like deleted successfully!",
+  TWEET_ID_IS_REQUIRED: "Tweet ID is required!",
+  TWEET_ID_INVALID: "Invalid tweet ID!",
+  ALREADY_LIKED: "Already liked!",
+  NOT_LIKED_YET: "Not liked yet!",
+}
