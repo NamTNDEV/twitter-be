@@ -111,6 +111,9 @@ export const TWEET_MESSAGES = {
   HASHTAGS_INVALID: "Invalid hashtag. Hashtag must be an array of strings!",
   MENTIONS_INVALID: "Invalid mention. Mention must be an array of User IDs!",
   MEDIAS_INVALID: "Invalid media. Media must be an array of Media objects!",
+  TWEET_ID_IS_REQUIRED: "Tweet ID is required!",
+  TWEET_ID_INVALID: "Invalid tweet ID!",
+  TWEET_NOT_FOUND: "Tweet not found!",
 } as const;
 
 export const BOOKMARK_MESSAGES = {
@@ -120,6 +123,9 @@ export const BOOKMARK_MESSAGES = {
   TWEET_ID_INVALID: "Invalid tweet ID!",
   ALREADY_BOOKMARKED: "Already bookmarked!",
   NOT_BOOKMARKED_YET: "Not bookmarked yet!",
+  BOOKMARK_ID_IS_REQUIRED: "Bookmark ID is required!",
+  BOOKMARK_ID_INVALID: "Invalid bookmark ID!",
+  BOOKMARK_NOT_FOUND: "Bookmark not found!",
 }
 
 export const LIKE_MESSAGES = {
@@ -129,4 +135,7 @@ export const LIKE_MESSAGES = {
   TWEET_ID_INVALID: "Invalid tweet ID!",
   ALREADY_LIKED: "Already liked!",
   NOT_LIKED_YET: "Not liked yet!",
+  LIKE_ID_IS_REQUIRED: "Like ID is required!",
+  LIKE_ID_INVALID: "Invalid like ID!",
+  LIKE_NOT_FOUND: "Like not found!",
 }

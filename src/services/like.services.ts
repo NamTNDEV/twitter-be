@@ -1,8 +1,14 @@
-import { WithId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import db from "~/configs/db.configs";
 import Like from "~/models/schemas/Like.schemas";
 
 class LikeService {
+  public async getLikeById(like_id: string) {
+    const like = await db.getLikeCollection().findOne({ _id: new ObjectId(like_id) });
+
+    return like;
+  }
+
   public async likeTweet(user_id: string, tweet_id: string) {
     const likeResult = await db.getLikeCollection().findOneAndUpdate(
       {

@@ -5,6 +5,11 @@ import Hashtag from "~/models/schemas/Hashtag";
 import Tweet from "~/models/schemas/Tweet.schemas";
 
 class TweetService {
+  public async getTweetById(tweet_id: string) {
+    const tweet = await db.getTweetCollection().findOne({ _id: new ObjectId(tweet_id) });
+    return tweet;
+  }
+
   public async checkAndCreateHashtags(hashtags: string[]) {
     const hashtagsDocument = await Promise.all(
       hashtags.map((hashtag) => {
