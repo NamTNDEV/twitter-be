@@ -114,6 +114,7 @@ export const TWEET_MESSAGES = {
   TWEET_ID_IS_REQUIRED: "Tweet ID is required!",
   TWEET_ID_INVALID: "Invalid tweet ID!",
   TWEET_NOT_FOUND: "Tweet not found!",
+  FETCHED_SUCCESSFUL: "Tweet fetched successfully!",
 } as const;
 
 export const BOOKMARK_MESSAGES = {
