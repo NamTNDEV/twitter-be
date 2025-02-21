@@ -32,10 +32,8 @@ export const postTweetValidation = validate(
         options: (value, { req }) => {
           const { type } = req.body as TweetReqBody
           if ([TweetType.Retweet, TweetType.QuoteTweet, TweetType.Comment].includes(type) && !ObjectId.isValid(value)) {
-            console.log(":::1:::")
             throw new Error(TWEET_MESSAGES.PARENT_TWEET_ID_INVALID)
           } else if (type === TweetType.Tweet && value !== null) {
-            console.log(":::2:::")
             throw new Error(TWEET_MESSAGES.PARENT_TWEET_ID_MUST_BE_NULL)
           }
           return true;

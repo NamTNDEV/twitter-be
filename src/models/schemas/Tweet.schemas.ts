@@ -8,12 +8,12 @@ interface TweetSchemaType {
   type: TweetType;
   audience: TweetAudience;
   content: string;
-  parent_tweet_id?: ObjectId;
+  parent_tweet_id: ObjectId | null;
   hashtags: ObjectId[];
   mentions: ObjectId[];
   medias: Media[];
-  guest_views: number;
-  user_views: number;
+  guest_views?: number;
+  user_views?: number;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -24,7 +24,7 @@ export default class Tweet {
   type: TweetType;
   audience: TweetAudience;
   content: string;
-  parent_tweet_id?: ObjectId;
+  parent_tweet_id: ObjectId | null;
   hashtags: ObjectId[];
   mentions: ObjectId[];
   medias: Media[];
@@ -43,8 +43,8 @@ export default class Tweet {
     this.hashtags = tweet.hashtags;
     this.mentions = tweet.mentions;
     this.medias = tweet.medias;
-    this.guest_views = tweet.guest_views;
-    this.user_views = tweet.user_views;
+    this.guest_views = tweet.guest_views || 0;
+    this.user_views = tweet.user_views || 0;
     this.created_at = tweet.created_at || new Date();
     this.updated_at = tweet.updated_at || new Date();
   }
