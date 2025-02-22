@@ -1,5 +1,6 @@
 import { ObjectId, WithId } from "mongodb";
 import db from "~/configs/db.configs";
+import { TweetType } from "~/constants/enums";
 import { TweetReqBody } from "~/models/requests/tweet.requests";
 import Hashtag from "~/models/schemas/Hashtag";
 import Tweet from "~/models/schemas/Tweet.schemas";
@@ -68,6 +69,16 @@ class TweetService {
       user_views: number;
       guest_views: number;
     }>;
+  }
+
+  async getTweetChildren({ tweetId, tweet_type, page, limit }: { tweetId: string, page: number, limit: number, tweet_type: TweetType }) {
+    const tweetChildrenAgg = await db.getTweetChildrenAggregationStagesById({ id: tweetId, page, limit, type: tweet_type });
+    const tweetChildrenResult = await db.getTweetCollection().aggregate<Tweet>(tweetChildrenAgg).toArray();
+    const totalChildren = await db.getTweetCollection().countDocuments({ parent_tweet_id: new ObjectId(tweetId), type: tweet_type });
+    return {
+      total: totalChildren,
+      tweets: tweetChildrenResult
+    }
   }
 }
 

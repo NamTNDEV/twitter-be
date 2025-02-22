@@ -8,6 +8,7 @@ import Tweet from '~/models/schemas/Tweet.schemas';
 import Hashtag from '~/models/schemas/Hashtag';
 import Bookmark from '~/models/schemas/Bookmark.schemas';
 import Like from '~/models/schemas/Like.schemas';
+import { TweetType } from '~/constants/enums';
 
 dotenv.config();
 const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
@@ -238,6 +239,109 @@ class Database {
         }
       },
       { $project: { tweet_children: 0 } }
+    ]
+  }
+
+  getTweetChildrenAggregationStagesById({ id, limit, page, type }: { id: string, limit: number, page: number, type: TweetType }) {
+    return [
+      {
+        $match: {
+          parent_tweet_id: new ObjectId(id),
+          type: type
+        }
+      },
+      {
+        $lookup: {
+          from: 'hash_tags',
+          localField: 'hashtags',
+          foreignField: '_id',
+          as: 'hashtags'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'mentions',
+          foreignField: '_id',
+          as: 'mentions'
+        }
+      },
+      {
+        $addFields: {
+          mentions: {
+            $map: {
+              input: '$mentions',
+              as: 'mention',
+              in: {
+                _id: '$$mention._id',
+                name: '$$mention.name',
+                username: '$$mention.username',
+                email: '$$mention.email'
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookmarks',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'bookmarks'
+        }
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'likes'
+        }
+      },
+      {
+        $lookup: {
+          from: 'tweets',
+          localField: '_id',
+          foreignField: 'parent_tweet_id',
+          as: 'tweet_children'
+        }
+      },
+      {
+        $addFields: {
+          bookmarks: { $size: '$bookmarks' },
+          likes: { $size: '$likes' },
+          retweet_counts: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: { $eq: ['$$item.type', 1] }
+              }
+            }
+          },
+          quote_counts: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: { $eq: ['$$item.type', 3] }
+              }
+            }
+          },
+          comment_counts: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: { $eq: ['$$item.type', 2] }
+              }
+            }
+          },
+        }
+      },
+      { $project: { tweet_children: 0 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit }
     ]
   }
 }
