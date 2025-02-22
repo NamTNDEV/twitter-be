@@ -116,7 +116,7 @@ export const tweetIdValidation = validate(
               status: HTTP_STATUS.BAD_REQUEST
             })
           }
-          const tweet = await tweetServices.getTweetById(value)
+          const tweet = await tweetServices.getTweetById(value, true)
           if (!tweet) {
             throw new ErrorWithStatus({
               message: TWEET_MESSAGES.TWEET_NOT_FOUND,

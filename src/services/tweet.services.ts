@@ -5,7 +5,12 @@ import Hashtag from "~/models/schemas/Hashtag";
 import Tweet from "~/models/schemas/Tweet.schemas";
 
 class TweetService {
-  public async getTweetById(tweet_id: string) {
+  public async getTweetById(tweet_id: string, isWithAggregations?: boolean) {
+    if (isWithAggregations) {
+      const tweetAggregations = db.getTweetAggregationStagesById(tweet_id);
+      const tweet = (await db.getTweetCollection().aggregate<Tweet>(tweetAggregations).toArray())[0];
+      return tweet
+    }
     const tweet = await db.getTweetCollection().findOne({ _id: new ObjectId(tweet_id) });
     return tweet;
   }
@@ -44,6 +49,25 @@ class TweetService {
       message: "Tweet posted successfully",
       result: result
     }
+  }
+
+  async increaseView(tweetId: string, userId?: string) {
+    const incValue = userId ? { user_views: 1 } : { guest_views: 1 };
+    const result = await db.getTweetCollection().findOneAndUpdate(
+      { _id: new ObjectId(tweetId) },
+      {
+        $inc: incValue
+      },
+      {
+        returnDocument: "after",
+        projection: { user_views: 1, guest_views: 1 }
+      }
+    );
+
+    return result as WithId<{
+      user_views: number;
+      guest_views: number;
+    }>;
   }
 }
 

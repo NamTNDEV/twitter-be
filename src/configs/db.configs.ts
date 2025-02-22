@@ -1,4 +1,4 @@
-import { Collection, MongoClient, ServerApiVersion } from 'mongodb';
+import { Collection, MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 import { UserType } from '~/models/schemas/User.schemas';
 import RefreshToken from '~/models/schemas/RefreshToken.schemas';
@@ -136,6 +136,109 @@ class Database {
     } catch (error) {
       console.error("❌ Error initializing database:", error);
     }
+  }
+
+  getTweetAggregationStagesById(id: string) {
+    return [
+      {
+        $match: {
+          _id: new ObjectId(id)
+        }
+      },
+      {
+        $lookup: {
+          from: 'hash_tags',
+          localField: 'hashtags',
+          foreignField: '_id',
+          as: 'hashtags'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'mentions',
+          foreignField: '_id',
+          as: 'mentions'
+        }
+      },
+      {
+        $addFields: {
+          mentions: {
+            $map: {
+              input: '$mentions',
+              as: 'mention',
+              in: {
+                _id: '$$mention._id',
+                name: '$$mention.name',
+                username: '$$mention.username',
+                email: '$$mention.email'
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookmarks',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'bookmarks'
+        }
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'likes'
+        }
+      },
+      {
+        $lookup: {
+          from: 'tweets',
+          localField: '_id',
+          foreignField: 'parent_tweet_id',
+          as: 'tweet_children'
+        }
+      },
+      {
+        $addFields: {
+          bookmarks: { $size: '$bookmarks' },
+          likes: { $size: '$likes' },
+          retweet_counts: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: { $eq: ['$$item.type', 1] }
+              }
+            }
+          },
+          quote_counts: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: { $eq: ['$$item.type', 3] }
+              }
+            }
+          },
+          comment_counts: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: { $eq: ['$$item.type', 2] }
+              }
+            }
+          },
+          // views: {
+          //   $add: ['$user_views', '$guest_views']
+          // }
+        }
+      },
+      { $project: { tweet_children: 0 } }
+    ]
   }
 }
 

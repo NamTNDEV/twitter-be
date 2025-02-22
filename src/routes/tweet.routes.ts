@@ -7,7 +7,8 @@ import { wrapRequestHandler } from "~/utils/handlers";
 export const tweetsRouter = Router();
 
 tweetsRouter.post("/", accessTokenValidation, verifiedUserValidation, postTweetValidation, wrapRequestHandler(postTweetController));
-tweetsRouter.get("/:tweet_id", tweetIdValidation,
+tweetsRouter.get("/:tweet_id",
+  tweetIdValidation,
   isLoggedInUserValidation(accessTokenValidation),
   isLoggedInUserValidation(verifiedUserValidation),
   audienceValidation,

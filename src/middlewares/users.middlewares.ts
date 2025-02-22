@@ -462,12 +462,10 @@ export const isLoggedInUserValidation = (middleware: (req: Request, res: Respons
   return (req: Request, res: Response, next: NextFunction) => {
     const isUserLoggedIn = req.headers.authorization;
     if (isUserLoggedIn) {
-      console.log("User is logged in :: :", isUserLoggedIn);
       middleware(req, res, next);
       return;
     }
 
-    console.log("User is not logged in :: :", isUserLoggedIn);
     next();
   }
 };
