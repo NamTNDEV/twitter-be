@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getTweetChildrenController, getTweetController, postTweetController } from "~/controllers/tweets.controllers";
-import { audienceValidation, postTweetValidation, tweetIdValidation } from "~/middlewares/tweets.middlewares";
+import { audienceValidation, getTweetChildrenValidator, postTweetValidation, tweetIdValidation } from "~/middlewares/tweets.middlewares";
 import { accessTokenValidation, isLoggedInUserValidation, verifiedUserValidation } from "~/middlewares/users.middlewares";
 import { wrapRequestHandler } from "~/utils/handlers";
 
@@ -19,4 +19,5 @@ tweetsRouter.get("/:tweet_id/children",
   isLoggedInUserValidation(accessTokenValidation),
   isLoggedInUserValidation(verifiedUserValidation),
   audienceValidation,
+  getTweetChildrenValidator,
   wrapRequestHandler(getTweetChildrenController));

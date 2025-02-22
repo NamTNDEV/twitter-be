@@ -117,6 +117,8 @@ export const TWEET_MESSAGES = {
   TWEET_NOT_FOUND: "Tweet not found!",
   FETCHED_SUCCESSFUL: "Tweet fetched successfully!",
   TWEET_IS_NOT_PUBLIC: "Tweet is not public!",
+  LIMIT_INVALID: "The limit must be from 1 to 100!",
+  PAGE_INVALID: "The page must be greater than 0!",
 } as const;
 
 export const BOOKMARK_MESSAGES = {
