@@ -6,7 +6,7 @@ export interface TweetReqBody {
   type: TweetType;
   audience: TweetAudience;
   content: string;
-  parent_tweet_id?: string;
+  parent_tweet_id?: string | null;
   hashtags?: string[];
   mentions?: string[];
   medias: Media[];
@@ -16,8 +16,11 @@ export interface TweetReqParams extends ParamsDictionary {
   tweet_id: string;
 }
 
-export interface TweetChildrenReqQuery extends Query {
+export interface TweetChildrenReqQuery extends PaginationReqQuery {
+  tweet_type: string;
+}
+
+export interface PaginationReqQuery extends Query {
   limit: string;
   page: string;
-  tweet_type: string;
 }

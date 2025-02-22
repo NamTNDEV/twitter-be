@@ -315,6 +315,11 @@ class UserService {
       }
     });
   }
+
+  public async getFolloweeByUserId(userId: string) {
+    const followees = await db.getFollowersCollection().find({ userId: new ObjectId(userId) }).toArray();
+    return followees as Follower[];
+  }
 }
 
 const userService = new UserService();

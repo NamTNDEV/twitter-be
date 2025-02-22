@@ -1,12 +1,23 @@
 import { Router } from "express";
-import { getTweetChildrenController, getTweetController, postTweetController } from "~/controllers/tweets.controllers";
-import { audienceValidation, getTweetChildrenValidator, postTweetValidation, tweetIdValidation } from "~/middlewares/tweets.middlewares";
+import { getNewFeedsController, getTweetChildrenController, getTweetController, postTweetController } from "~/controllers/tweets.controllers";
+import { audienceValidation, getTweetChildrenValidator, paginationValidation, postTweetValidation, tweetIdValidation } from "~/middlewares/tweets.middlewares";
 import { accessTokenValidation, isLoggedInUserValidation, verifiedUserValidation } from "~/middlewares/users.middlewares";
 import { wrapRequestHandler } from "~/utils/handlers";
 
 export const tweetsRouter = Router();
 
-tweetsRouter.post("/", accessTokenValidation, verifiedUserValidation, postTweetValidation, wrapRequestHandler(postTweetController));
+tweetsRouter.get("/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  paginationValidation,
+  wrapRequestHandler(getNewFeedsController));
+
+tweetsRouter.post("/",
+  accessTokenValidation,
+  verifiedUserValidation,
+  postTweetValidation,
+  wrapRequestHandler(postTweetController));
+
 tweetsRouter.get("/:tweet_id",
   tweetIdValidation,
   isLoggedInUserValidation(accessTokenValidation),
@@ -19,5 +30,6 @@ tweetsRouter.get("/:tweet_id/children",
   isLoggedInUserValidation(accessTokenValidation),
   isLoggedInUserValidation(verifiedUserValidation),
   audienceValidation,
+  paginationValidation,
   getTweetChildrenValidator,
   wrapRequestHandler(getTweetChildrenController));

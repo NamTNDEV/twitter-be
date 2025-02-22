@@ -4,6 +4,7 @@ import { TweetType } from "~/constants/enums";
 import { TweetReqBody } from "~/models/requests/tweet.requests";
 import Hashtag from "~/models/schemas/Hashtag";
 import Tweet from "~/models/schemas/Tweet.schemas";
+import userService from "./users.services";
 
 class TweetService {
   public async getTweetById(tweet_id: string, isWithAggregations?: boolean) {
@@ -109,6 +110,13 @@ class TweetService {
       total: totalChildren,
       tweets: tweetChildrenResult
     }
+  }
+
+  async getNewFeeds({ user_id, limit, page }: { user_id: string, limit: number, page: number }) {
+    const followeeList = await userService.getFolloweeByUserId(user_id);
+    const followeeIds = followeeList.map(followee => followee._id);
+    followeeIds.push(new ObjectId(user_id));
+    return { followeeIds };
   }
 }
 

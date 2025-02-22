@@ -228,7 +228,11 @@ export const getTweetChildrenValidator = validate(
         options: [transEnumToNumber(TweetType)],
         errorMessage: TWEET_MESSAGES.TYPE_INVALID
       }
-    },
+    }
+  }, ['query']))
+
+export const paginationValidation = validate(
+  checkSchema({
     limit: {
       isNumeric: true,
       custom: {
@@ -253,4 +257,4 @@ export const getTweetChildrenValidator = validate(
         }
       }
     }
-  }, ['query']))
+  }, ['query']));
