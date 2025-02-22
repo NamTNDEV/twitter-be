@@ -1,9 +1,9 @@
 import { checkSchema } from "express-validator"
 import { isEmpty } from "lodash"
 import { ObjectId } from "mongodb"
-import { MediaType, TweetAudience, TweetType } from "~/constants/enums"
+import { MediaType, TweetAudience, TweetType, UserVerifyStatus } from "~/constants/enums"
 import { HTTP_STATUS } from "~/constants/httpStatus"
-import { BOOKMARK_MESSAGES, LIKE_MESSAGES, TWEET_MESSAGES } from "~/constants/messages"
+import { BOOKMARK_MESSAGES, LIKE_MESSAGES, MESSAGES, TWEET_MESSAGES } from "~/constants/messages"
 import { ErrorWithStatus } from "~/models/Errors"
 import { TweetReqBody } from "~/models/requests/tweet.requests"
 import bookmarkService from "~/services/bookmark.services"
@@ -11,6 +11,11 @@ import likeService from "~/services/like.services"
 import tweetServices from "~/services/tweet.services"
 import { transEnumToNumber } from "~/utils/commons"
 import { validate } from "~/utils/validation"
+import { Request, Response, NextFunction } from "express"
+import { wrapRequestHandler } from "~/utils/handlers"
+import { TokenPayload } from "~/models/requests/user.requests"
+import db from "~/configs/db.configs"
+import Tweet from "~/models/schemas/Tweet.schemas"
 
 export const postTweetValidation = validate(
   checkSchema({
@@ -104,20 +109,21 @@ export const tweetIdValidation = validate(
         errorMessage: TWEET_MESSAGES.TWEET_ID_IS_REQUIRED,
       },
       custom: {
-        options: async (value) => {
+        options: async (value, { req }) => {
           if (!ObjectId.isValid(value)) {
             throw new ErrorWithStatus({
               message: TWEET_MESSAGES.TWEET_ID_INVALID,
               status: HTTP_STATUS.BAD_REQUEST
             })
           }
-          const isTweetExist = await tweetServices.getTweetById(value)
-          if (!isTweetExist) {
+          const tweet = await tweetServices.getTweetById(value)
+          if (!tweet) {
             throw new ErrorWithStatus({
               message: TWEET_MESSAGES.TWEET_NOT_FOUND,
               status: HTTP_STATUS.NOT_FOUND
             })
           }
+          (req as Request).tweet = tweet
           return true
         }
       }
@@ -180,3 +186,37 @@ export const likeIdValidation = validate(
     }
   }, ['params'])
 );
+
+export const audienceValidation = wrapRequestHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const tweet = req.tweet as Tweet
+  if (tweet.audience === TweetAudience.Followers) {
+
+    const { user_id } = req.decoded_authorization as TokenPayload
+    if (!user_id) {
+      throw new ErrorWithStatus({
+        message: MESSAGES.UNAUTHORIZED,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    }
+
+    const author = await db.getUserCollection().findOne({ _id: tweet.user_id })
+    if (!author || author.verify === UserVerifyStatus.Banned) {
+      throw new ErrorWithStatus({
+        message: MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+
+    const isInTweetCircle = author.twitter_circle?.some(
+      (user_circle_id) => user_circle_id.equals(user_id)
+    )
+
+    if (!author._id.equals(user_id) && !isInTweetCircle) {
+      throw new ErrorWithStatus({
+        message: TWEET_MESSAGES.TWEET_IS_NOT_PUBLIC,
+        status: HTTP_STATUS.FORBIDDEN
+      })
+    }
+  }
+  next()
+})

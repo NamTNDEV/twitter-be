@@ -37,6 +37,7 @@ export const MESSAGES = {
   OAUTH_SUCCESSFUL: "OAuth successful!",
   OAUTH_FAILED: "OAuth failed!",
   GMAIL_NOT_VERIFIED: "Gmail is not verified!",
+  UNAUTHORIZED: "Unauthorized!",
 
   ACCESS_TOKEN_INVALID: "Invalid access token!",
   ACCESS_TOKEN_IS_REQUIRED: "Access token is required!",
@@ -115,6 +116,7 @@ export const TWEET_MESSAGES = {
   TWEET_ID_INVALID: "Invalid tweet ID!",
   TWEET_NOT_FOUND: "Tweet not found!",
   FETCHED_SUCCESSFUL: "Tweet fetched successfully!",
+  TWEET_IS_NOT_PUBLIC: "Tweet is not public!",
 } as const;
 
 export const BOOKMARK_MESSAGES = {
