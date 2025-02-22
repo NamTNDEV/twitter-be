@@ -57,24 +57,54 @@ class TweetService {
     const result = await db.getTweetCollection().findOneAndUpdate(
       { _id: new ObjectId(tweetId) },
       {
-        $inc: incValue
+        $inc: incValue,
+        $currentDate: {
+          updated_at: true
+        }
       },
       {
         returnDocument: "after",
-        projection: { user_views: 1, guest_views: 1 }
+        projection: { user_views: 1, guest_views: 1, updated_at: 1 }
       }
     );
 
     return result as WithId<{
       user_views: number;
       guest_views: number;
+      updated_at: Date;
     }>;
   }
 
-  async getTweetChildren({ tweetId, tweet_type, page, limit }: { tweetId: string, page: number, limit: number, tweet_type: TweetType }) {
+  async getTweetChildren({ tweetId, tweet_type, page, limit, user_id }: { tweetId: string, page: number, limit: number, tweet_type: TweetType, user_id?: string }) {
     const tweetChildrenAgg = await db.getTweetChildrenAggregationStagesById({ id: tweetId, page, limit, type: tweet_type });
     const tweetChildrenResult = await db.getTweetCollection().aggregate<Tweet>(tweetChildrenAgg).toArray();
-    const totalChildren = await db.getTweetCollection().countDocuments({ parent_tweet_id: new ObjectId(tweetId), type: tweet_type });
+    const idsArr = tweetChildrenResult.map(tweet => tweet._id as ObjectId);
+    const inc = user_id ? { user_views: 1 } : { guest_views: 1 };
+    const updatedViewsAt = new Date();
+    const [totalChildren] = await Promise.all([
+      await db.getTweetCollection().countDocuments({ parent_tweet_id: new ObjectId(tweetId), type: tweet_type }),
+      await db.getTweetCollection().updateMany(
+        {
+          _id: {
+            $in: idsArr
+          }
+        },
+        {
+          $inc: inc,
+          $set: {
+            updated_at: updatedViewsAt
+          }
+        }
+      )
+    ])
+    tweetChildrenResult.forEach(tweet => {
+      if (user_id) {
+        tweet.user_views++;
+      } else {
+        tweet.guest_views++;
+      }
+      tweet.updated_at = updatedViewsAt;
+    })
     return {
       total: totalChildren,
       tweets: tweetChildrenResult
