@@ -144,3 +144,11 @@ export const LIKE_MESSAGES = {
   LIKE_ID_INVALID: "Invalid like ID!",
   LIKE_NOT_FOUND: "Like not found!",
 }
+
+export const SEARCH_MESSAGES = {
+  SEARCH_SUCCESSFUL: "Search successful!",
+  QUERY_IS_REQUIRED: "Query is required!",
+  QUERY_MUST_BE_STRING: "Query must be a string!",
+  LIMIT_INVALID: "The limit must be from 1 to 100!",
+  PAGE_INVALID: "The page must be greater than 0!",
+}

@@ -10,6 +10,7 @@ import cors from 'cors';
 import { tweetsRouter } from './routes/tweet.routes';
 import { bookmarksRoutes } from './routes/bookmarks.routes';
 import { likesRoutes } from './routes/likes.routes';
+import { searchRoutes } from './routes/search.routes';
 
 config();
 const app = express();
@@ -31,6 +32,7 @@ app.use('/static', staticRoutes);
 app.use('/tweets', tweetsRouter);
 app.use('/bookmarks', bookmarksRoutes);
 app.use('/likes', likesRoutes);
+app.use('/search', searchRoutes);
 app.use(defaultErrorHandler);
 
 app.listen(PORT, () => {

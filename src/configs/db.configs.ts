@@ -560,6 +560,218 @@ class Database {
       }
     ]
   }
+
+  getSearchNewFeedPipeline({ user_id, limit, page, query }: { user_id: string, limit: number, page: number, query: string }) {
+    return [
+      {
+        $match: {
+          $text: {
+            $search: query
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: {
+          path: '$user'
+        }
+      },
+      {
+        $match: {
+          $or: [
+            {
+              audience: TweetAudience.Public
+            },
+            {
+              $and: [
+                {
+                  audience: TweetAudience.Followers
+                },
+                {
+                  'user.twitter_circle': {
+                    $in: [new ObjectId(user_id)]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: 'hash_tags',
+          localField: 'hashtags',
+          foreignField: '_id',
+          as: 'hashtags'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'mentions',
+          foreignField: '_id',
+          as: 'mentions'
+        }
+      },
+      {
+        $addFields: {
+          mentions: {
+            $map: {
+              input: '$mentions',
+              as: 'mention',
+              in: {
+                _id: '$$mention._id',
+                name: '$$mention.name',
+                username: '$$mention.username',
+                email: '$$mention.email'
+              }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookmarks',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'bookmarks'
+        }
+      },
+      {
+        $lookup: {
+          from: 'likes',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'likes'
+        }
+      },
+      {
+        $lookup: {
+          from: 'tweets',
+          localField: '_id',
+          foreignField: 'parent_id',
+          as: 'tweet_children'
+        }
+      },
+      {
+        $addFields: {
+          bookmarks: {
+            $size: '$bookmarks'
+          },
+          likes: {
+            $size: '$likes'
+          },
+          retweet_count: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: {
+                  $eq: ['$$item.type', TweetType.Retweet]
+                }
+              }
+            }
+          },
+          comment_count: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: {
+                  $eq: ['$$item.type', TweetType.Comment]
+                }
+              }
+            }
+          },
+          quote_count: {
+            $size: {
+              $filter: {
+                input: '$tweet_children',
+                as: 'item',
+                cond: {
+                  $eq: ['$$item.type', TweetType.QuoteTweet]
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          tweet_children: 0,
+          user: {
+            password: 0,
+            email_verify_token: 0,
+            forgot_password_token: 0,
+            twitter_circle: 0,
+            date_of_birth: 0
+          }
+        }
+      },
+      {
+        $skip: limit * (page - 1)
+      },
+      {
+        $limit: limit
+      }
+    ]
+  }
+
+  getSearchCountNewFeedPipeline({ user_id, query }: { user_id: string, query: string }) {
+    return [
+      {
+        $match: {
+          $text: {
+            $search: query
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: {
+          path: '$user'
+        }
+      },
+      {
+        $match: {
+          $or: [
+            {
+              audience: TweetAudience.Public
+            },
+            {
+              $and: [
+                {
+                  audience: TweetAudience.Followers
+                },
+                {
+                  'user.twitter_circle': {
+                    $in: [new ObjectId(user_id)]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        $count: 'total'
+      }
+    ]
+  }
 }
 
 const db = Database.getInstance();
