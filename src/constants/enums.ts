@@ -13,7 +13,13 @@ export enum TokenTypes {
 
 export enum MediaType {
   Image,
-  Video
+  Video,
+  HLS
+}
+
+export enum MediaQueryType {
+  Image = "image",
+  Video = "video",
 }
 
 export enum EncodingStatus {

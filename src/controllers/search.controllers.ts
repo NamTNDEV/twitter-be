@@ -6,9 +6,9 @@ import { TokenPayload } from '~/models/requests/user.requests';
 import searchService from '~/services/search.services';
 
 export const searchController = async (req: Request<ParamsDictionary, any, any, SearchReqQuery>, res: Response) => {
-  const { query, limit, page } = req.query;
+  const { query, limit, page, media_type } = req.query;
   const { user_id } = req.decoded_authorization as TokenPayload;
-  const searchResult = await searchService.doSearch({ query, limit, page, user_id });
+  const searchResult = await searchService.doSearch({ query, limit, page, user_id, media_type });
   res.json({
     message: SEARCH_MESSAGES.SEARCH_SUCCESSFUL,
     result: {

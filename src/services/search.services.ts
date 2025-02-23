@@ -4,18 +4,20 @@ import { SearchReqQuery } from "~/models/requests/search.request";
 import Tweet from "~/models/schemas/Tweet.schemas";
 
 class SearchService {
-  public async doSearch({ query, limit, page, user_id }: SearchReqQuery) {
+  public async doSearch({ query, limit, page, user_id, media_type }: SearchReqQuery) {
     const searchPage = Number(page) || 1;
     const searchLimit = Number(limit) || 10;
     const searchNewFeedsPipeline = db.getSearchNewFeedPipeline({
       query,
       user_id,
       limit: searchLimit,
-      page: searchPage
+      page: searchPage,
+      media_type
     });
     const searchCountNewFeedsPipeline = db.getSearchCountNewFeedPipeline({
       query,
-      user_id
+      user_id,
+      media_type
     });
     const [searchResult, totalSearchResult] = await Promise.all([
       db.getTweetCollection().aggregate<Tweet>(searchNewFeedsPipeline).toArray(),

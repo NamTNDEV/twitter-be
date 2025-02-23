@@ -8,7 +8,7 @@ import Tweet from '~/models/schemas/Tweet.schemas';
 import Hashtag from '~/models/schemas/Hashtag';
 import Bookmark from '~/models/schemas/Bookmark.schemas';
 import Like from '~/models/schemas/Like.schemas';
-import { TweetAudience, TweetType } from '~/constants/enums';
+import { MediaQueryType, MediaType, TweetAudience, TweetType } from '~/constants/enums';
 
 dotenv.config();
 const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
@@ -564,14 +564,23 @@ class Database {
     ]
   }
 
-  getSearchNewFeedPipeline({ user_id, limit, page, query }: { user_id: string, limit: number, page: number, query: string }) {
+  getSearchNewFeedPipeline({ user_id, limit, page, query, media_type }: { user_id: string, limit: number, page: number, query: string, media_type?: MediaQueryType }) {
+    const $match: any = {
+      $text: {
+        $search: query
+      }
+    }
+    if (media_type === MediaQueryType.Image) {
+      $match['medias.type'] = MediaType.Image;
+    }
+    if (media_type === MediaQueryType.Video) {
+      $match['medias.type'] = {
+        $in: [MediaType.Video, MediaType.HLS]
+      };
+    }
     return [
       {
-        $match: {
-          $text: {
-            $search: query
-          }
-        }
+        $match
       },
       {
         $lookup: {
@@ -727,14 +736,23 @@ class Database {
     ]
   }
 
-  getSearchCountNewFeedPipeline({ user_id, query }: { user_id: string, query: string }) {
+  getSearchCountNewFeedPipeline({ user_id, query, media_type }: { user_id: string, query: string, media_type?: MediaQueryType }) {
+    const $match: any = {
+      $text: {
+        $search: query
+      }
+    }
+    if (media_type === MediaQueryType.Image) {
+      $match['medias.type'] = MediaType.Image;
+    }
+    if (media_type === MediaQueryType.Video) {
+      $match['medias.type'] = {
+        $in: [MediaType.Video, MediaType.HLS]
+      };
+    }
     return [
       {
-        $match: {
-          $text: {
-            $search: query
-          }
-        }
+        $match
       },
       {
         $lookup: {
