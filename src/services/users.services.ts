@@ -12,6 +12,7 @@ import { MESSAGES } from "~/constants/messages";
 import Follower from "~/models/schemas/Follower.schemas";
 import axios from "axios";
 import { verifyToken } from "~/utils/jwt";
+import { sendVerifyEmail } from "~/utils/email";
 
 export interface OAuthGoogleTokenResType {
   access_token: string;
@@ -130,6 +131,13 @@ class UserService {
     );
     const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
     await authService.saveRefreshToken(userId.toString(), refreshToken, exp, iat);
+
+    sendVerifyEmail(
+      "namtndev312002@gmail.com",
+      "Verify Email",
+      `Click this link to verify your email: ${process.env.FRONTEND_URL}/verify-email?token=${emailVerifyToken}`
+    );
+
     return {
       accessToken,
       refreshToken
