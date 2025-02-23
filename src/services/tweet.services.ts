@@ -114,9 +114,45 @@ class TweetService {
 
   async getNewFeeds({ user_id, limit, page }: { user_id: string, limit: number, page: number }) {
     const followeeList = await userService.getFolloweeByUserId(user_id);
-    const followeeIds = followeeList.map(followee => followee._id);
+    const followeeIds = followeeList.map(followee => followee._id) as ObjectId[];
     followeeIds.push(new ObjectId(user_id));
-    return { followeeIds };
+    const newFeedsPipeline = db.getNewFeedPipeline({
+      followeeIds: followeeIds,
+      page,
+      limit,
+      user_id
+    });
+    const countNewFeedsPipeline = db.countNewFeedPipeline({
+      followeeIds: followeeIds,
+      user_id
+    });
+    const [totalNewFeeds, newFeeds] = await Promise.all([
+      await db.getTweetCollection().aggregate(countNewFeedsPipeline).toArray(),
+      await db.getTweetCollection().aggregate<Tweet>(newFeedsPipeline).toArray()
+    ]);
+    const idsArr = newFeeds.map(tweet => tweet._id as ObjectId);
+    const updatedViewsAt = new Date();
+    await db.getTweetCollection().updateMany(
+      {
+        _id: {
+          $in: idsArr
+        }
+      },
+      {
+        $inc: { user_views: 1 },
+        $set: {
+          updated_at: updatedViewsAt
+        }
+      }
+    )
+    newFeeds.forEach(tweet => {
+      tweet.user_views++;
+      tweet.updated_at = updatedViewsAt;
+    })
+    return {
+      total: totalNewFeeds[0].total,
+      tweets: newFeeds
+    };
   }
 }
 
