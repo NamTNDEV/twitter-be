@@ -564,7 +564,7 @@ class Database {
     ]
   }
 
-  getSearchNewFeedPipeline({ user_id, limit, page, query, media_type }: { user_id: string, limit: number, page: number, query: string, media_type?: MediaQueryType }) {
+  getSearchNewFeedPipeline({ user_id, limit, page, query, media_type, pf_ids }: { user_id: string, limit: number, page: number, query: string, media_type?: MediaQueryType, pf_ids: ObjectId[] }) {
     const $match: any = {
       $text: {
         $search: query
@@ -577,6 +577,11 @@ class Database {
       $match['medias.type'] = {
         $in: [MediaType.Video, MediaType.HLS]
       };
+    }
+    if (pf_ids.length) {
+      $match['user_id'] = {
+        $in: pf_ids
+      }
     }
     return [
       {
@@ -736,7 +741,7 @@ class Database {
     ]
   }
 
-  getSearchCountNewFeedPipeline({ user_id, query, media_type }: { user_id: string, query: string, media_type?: MediaQueryType }) {
+  getSearchCountNewFeedPipeline({ user_id, query, media_type, pf_ids }: { user_id: string, query: string, media_type?: MediaQueryType, pf_ids: ObjectId[] }) {
     const $match: any = {
       $text: {
         $search: query
@@ -749,6 +754,11 @@ class Database {
       $match['medias.type'] = {
         $in: [MediaType.Video, MediaType.HLS]
       };
+    }
+    if (pf_ids.length) {
+      $match['user_id'] = {
+        $in: pf_ids
+      }
     }
     return [
       {
