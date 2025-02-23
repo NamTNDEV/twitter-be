@@ -117,6 +117,13 @@ class Database {
     await this.getFollowersCollection().createIndex({ userId: 1, followeeId: 1 });
   }
 
+  async indexTweetCollection() {
+    const isIndexExists = await this.getTweetCollection().indexExists(['content_text']);
+    console.log('Is indexTweetCollection exists:', isIndexExists);
+    if (isIndexExists) return;
+    await this.getTweetCollection().createIndex({ content: 'text' });
+  }
+
   async ensureIndexes() {
     try {
       console.log(":::Creating indexes:::");
@@ -124,6 +131,7 @@ class Database {
       await this.indexRefreshTokenCollection();
       await this.indexVideoStatusCollection();
       await this.indexFollowersCollection();
+      await this.indexTweetCollection();
       console.log("✅ Indexes created successfully!");
     } catch (error) {
       console.error("❌ Error creating indexes:", error);
