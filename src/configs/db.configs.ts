@@ -121,7 +121,10 @@ class Database {
     const isIndexExists = await this.getTweetCollection().indexExists(['content_text']);
     console.log('Is indexTweetCollection exists:', isIndexExists);
     if (isIndexExists) return;
-    await this.getTweetCollection().createIndex({ content: 'text' });
+    await this.getTweetCollection().createIndex(
+      { content: 'text' },
+      { default_language: 'none' } // Tắt "stop words" để tìm kiếm chính xác các chữ phổ biến trong tiếng Anh như: "the", "a", "who",...
+    );
   }
 
   async ensureIndexes() {
