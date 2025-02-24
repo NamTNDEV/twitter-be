@@ -12,7 +12,7 @@ import { MESSAGES } from "~/constants/messages";
 import Follower from "~/models/schemas/Follower.schemas";
 import axios from "axios";
 import { verifyToken } from "~/utils/jwt";
-import { sendVerifyEmail } from "~/utils/email";
+import { sendForgotPasswordEmailWithTemplate, sendVerifyEmailWithTemplate } from "~/utils/email";
 
 export interface OAuthGoogleTokenResType {
   access_token: string;
@@ -132,10 +132,9 @@ class UserService {
     const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
     await authService.saveRefreshToken(userId.toString(), refreshToken, exp, iat);
 
-    sendVerifyEmail(
-      "namtndev312002@gmail.com",
-      "Verify Email",
-      `Click this link to verify your email: ${process.env.FRONTEND_URL}/verify-email?token=${emailVerifyToken}`
+    await sendVerifyEmailWithTemplate(
+      user.email,
+      emailVerifyToken
     );
 
     return {
@@ -202,7 +201,7 @@ class UserService {
     }
   }
 
-  public async resendEmailVerification(userId: string) {
+  public async resendEmailVerification(userId: string, email: string) {
     const emailVerifyToken = await emailService.signEmailVerifyToken({ userId, verifyStatus: UserVerifyStatus.Unverified });
     await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
       $set: {
@@ -214,10 +213,15 @@ class UserService {
       }
     });
 
+    await sendVerifyEmailWithTemplate(
+      email,
+      emailVerifyToken
+    );
+
     return { email_verify_token: emailVerifyToken };
   }
 
-  public async forgotPassword({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
+  public async forgotPassword({ userId, verifyStatus, email }: { userId: string, verifyStatus: UserVerifyStatus, email: string }) {
     const forgotPasswordToken = await authService.signForgotPasswordToken({ userId, verifyStatus });
     await db.getUserCollection().updateOne({ _id: new ObjectId(userId) }, {
       $set: {
@@ -228,6 +232,8 @@ class UserService {
         updated_at: true
       }
     });
+
+    await sendForgotPasswordEmailWithTemplate(email, forgotPasswordToken);
 
     return { forgot_password_token: forgotPasswordToken };
   }

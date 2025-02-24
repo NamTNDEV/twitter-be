@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{email_subject}}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .header {
+        background-color: #1da1f2;
+        padding: 15px;
+        border-radius: 8px 8px 0 0;
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .content {
+        padding: 20px;
+        font-size: 16px;
+        color: #333;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 20px;
+        margin: 20px 0;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        background-color: #1da1f2;
+        border-radius: 5px;
+      }
+
+      a.button {
+        color: #ffffff !important;
+      }
+
+      .footer {
+        font-size: 14px;
+        color: #666;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+      .footer a {
+        color: #1da1f2;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">{{email_title}}</div>
+      <div class="content">
+        <p>Hello <strong>{{username}}</strong>,</p>
+        <p>{{email_message}}</p>
+        <a href="{{action_link}}" class="button">{{button_text}}</a>
+        <p>{{email_footer}}</p>
+      </div>
+      <div class="footer">
+        <p>
+          Need help? Contact our support team at <a href="mailto:support@twitterclone.com">support@twitterclone.com</a>
+        </p>
+        <p>&copy; 2024 Twitter Clone. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
