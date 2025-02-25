@@ -14,8 +14,6 @@ const s3 = new S3({
   }
 })
 
-const testUploadFile = fs.readFileSync(path.resolve('uploads/images/twitter_logo.jpg'));
-
 export const uploadFileToS3 = ({
   fileName,
   filePath,

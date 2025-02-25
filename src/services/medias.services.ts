@@ -26,7 +26,7 @@ class MediaService {
         await sharp(file.filepath).jpeg().toFile(uploadPath);
 
         const s3Result = await uploadFileToS3({
-          fileName: decoratedFilename,
+          fileName: 'images/' + decoratedFilename,
           filePath: uploadPath,
           contentType: mime.getType(uploadPath) as string
         });
@@ -53,13 +53,21 @@ class MediaService {
 
   public async uploadVideo(req: Request, res: Response) {
     const uploadedVideos = await handleUploadVideo(req, res);
-    const result: Media[] = uploadedVideos.map(file => {
-      return {
-        url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video/${file.newFilename}` : `${process.env.HOST}/static/video/${file.newFilename}`,
-        type: MediaType.Video
-      }
-    })
-    return result;
+    const s3Results: Media[] = await Promise.all(
+      await uploadedVideos.map(async file => {
+        const s3Result = await uploadFileToS3({
+          fileName: 'videos/' + file.newFilename,
+          filePath: file.filepath,
+          contentType: mime.getType(file.filepath) as string
+        });
+        deleteFileAfterUpload(file.filepath);
+        return {
+          url: (s3Result as CompleteMultipartUploadCommandOutput).Location as string,
+          type: MediaType.Video
+        }
+      })
+    )
+    return s3Results;
   }
 
   public async uploadVideoHls(req: Request, res: Response) {
@@ -68,7 +76,6 @@ class MediaService {
       uploadedVideos.map(async video => {
         const newNameFile = getNameWithoutExtension(video.newFilename);
         // await encodeHLSWithMultipleVideoStreams(video.filepath);
-        // await deleteFileAfterUpload(video.filepath);
         queue.enqueue(video.filepath);
         return {
           url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}/master.m3u8` : `${process.env.HOST}/static/video/${newNameFile}/master.m3u8`,
