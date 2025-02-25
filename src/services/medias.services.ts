@@ -9,6 +9,10 @@ import { checkEnv } from "~/utils/env.ultis";
 import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, handleUploadVideoHls, imagesPath, } from "~/utils/file";
 import { Queue } from "~/utils/queue";
 import { encodeHLSWithMultipleVideoStreams } from "~/utils/video";
+import fsPromise from 'fs/promises'
+import { uploadFileToS3 } from "~/utils/s3";
+import { CompleteMultipartUploadCommandOutput } from "@aws-sdk/client-s3";
+import mime from 'mime';
 
 const queue = Queue.getInstance();
 class MediaService {
@@ -20,9 +24,25 @@ class MediaService {
         const decoratedFilename = `${newNameFile}.jpg`;
         const uploadPath = path.resolve(imagesPath, decoratedFilename);
         await sharp(file.filepath).jpeg().toFile(uploadPath);
-        deleteFileAfterUpload(file.filepath);
+
+        const s3Result = await uploadFileToS3({
+          fileName: decoratedFilename,
+          filePath: uploadPath,
+          contentType: mime.getType(uploadPath) as string
+        });
+
+        // deleteFileAfterUpload(file.filepath);
+        Promise.all([
+          fsPromise.unlink(file.filepath),
+          fsPromise.unlink(uploadPath)
+        ])
+        // return {
+        //   url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/image/${decoratedFilename}` : `${process.env.HOST}/static/image/${decoratedFilename}`,
+        //   type: MediaType.Image
+        // }
+
         return {
-          url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/image/${decoratedFilename}` : `${process.env.HOST}/static/image/${decoratedFilename}`,
+          url: (s3Result as CompleteMultipartUploadCommandOutput).Location as string,
           type: MediaType.Image
         }
       })
