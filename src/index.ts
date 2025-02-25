@@ -11,7 +11,6 @@ import { tweetsRouter } from './routes/tweet.routes';
 import { bookmarksRoutes } from './routes/bookmarks.routes';
 import { likesRoutes } from './routes/likes.routes';
 import { searchRoutes } from './routes/search.routes';
-import "./utils/s3";
 
 config();
 const app = express();
