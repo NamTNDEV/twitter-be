@@ -75,7 +75,6 @@ class MediaService {
     const result: Media[] = await Promise.all(
       uploadedVideos.map(async video => {
         const newNameFile = getNameWithoutExtension(video.newFilename);
-        // await encodeHLSWithMultipleVideoStreams(video.filepath);
         queue.enqueue(video.filepath);
         return {
           url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}/master.m3u8` : `${process.env.HOST}/static/video/${newNameFile}/master.m3u8`,

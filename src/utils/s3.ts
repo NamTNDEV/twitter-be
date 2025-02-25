@@ -3,6 +3,8 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { config } from "dotenv";
 import path from "path";
 import fs from "fs";
+import { Response } from "express";
+import { HTTP_STATUS } from "~/constants/httpStatus";
 
 config();
 
@@ -53,3 +55,15 @@ export const uploadFileToS3 = ({
 
   return parallelUploads3.done();
 }
+
+export const sendFileFromS3 = async (res: Response, filePath: string) => {
+  try {
+    const data = await s3.getObject({
+      Bucket: process.env.S3_BUCKET_NAME as string,
+      Key: filePath
+    })
+      ; (data.Body as any).pipe(res);
+  } catch (error) {
+    res.status(HTTP_STATUS.NOT_FOUND).send("File not found");
+  }
+};
