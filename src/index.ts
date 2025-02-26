@@ -16,13 +16,22 @@ import { conversationRoutes } from './routes/conversation.routes';
 import initSocketHttpServer from './utils/socket';
 import envConfig from './constants/config';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 const httpServer = createServer(app);
 const PORT = envConfig.server.PORT;
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+  // store: ... , // Redis, Memcached, etc. See below.
+})
 
 initUploadsDir();
 
+app.use(limiter);
 app.use(helmet())
 app.use(cors(
   {
