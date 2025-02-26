@@ -1,8 +1,8 @@
 import { config } from "dotenv"
-import { getEnvPath } from "~/utils/env.ultis";
+import { getEnvPath, getEnvPathWithoutLib3 } from "~/utils/env.ultis";
 
 config({
-  path: getEnvPath()
+  path: getEnvPathWithoutLib3(process.env.NODE_ENV as string)
 });
 
 const envConfig = {
