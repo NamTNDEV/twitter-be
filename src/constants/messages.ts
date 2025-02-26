@@ -152,3 +152,20 @@ export const SEARCH_MESSAGES = {
   LIMIT_INVALID: "The limit must be from 1 to 100!",
   PAGE_INVALID: "The page must be greater than 0!",
 }
+
+export const CONVERSATION_MESSAGES = {
+  GET_CONVERSATIONS_SUCCESSFUL: "Get conversations successful!",
+  CONVERSATION_CREATED: "Conversation created successfully!",
+  CONVERSATION_DELETED: "Conversation deleted successfully!",
+  CONVERSATION_ID_IS_REQUIRED: "Conversation ID is required!",
+  CONVERSATION_ID_INVALID: "Invalid conversation ID!",
+  CONVERSATION_NOT_FOUND: "Conversation not found!",
+  SENDER_ID_IS_REQUIRED: "Sender ID is required!",
+  SENDER_ID_INVALID: "Invalid sender ID!",
+  RECEIVER_ID_IS_REQUIRED: "Receiver ID is required!",
+  RECEIVER_ID_INVALID: "Invalid receiver ID!",
+  MESSAGE_IS_REQUIRED: "Message is required!",
+  MESSAGE_MUST_BE_STRING: "Message must be a string!",
+  LIMIT_INVALID: "The limit must be from 1 to 100!",
+  PAGE_INVALID: "The page must be greater than 0!",
+}

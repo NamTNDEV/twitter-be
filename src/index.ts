@@ -14,6 +14,8 @@ import { searchRoutes } from './routes/search.routes';
 import { createServer } from "http";
 import { Server } from "socket.io";
 import conversationService from './services/convesation.services';
+import { ObjectId } from 'mongodb';
+import { conversationRoutes } from './routes/conversation.routes';
 
 config();
 const app = express();
@@ -43,6 +45,7 @@ app.use('/tweets', tweetsRouter);
 app.use('/bookmarks', bookmarksRoutes);
 app.use('/likes', likesRoutes);
 app.use('/search', searchRoutes);
+app.use('/conversations', conversationRoutes);
 app.use(defaultErrorHandler);
 
 const connectedUsers: {
@@ -61,12 +64,12 @@ io.on("connection", (socket) => {
     socketId: socket.id
   };
 
-  socket.on("chat message", async (payload) => {
+  socket.on("chat message", async (payload: { to: string, from: string, message: string }) => {
     const receiverSocketId = connectedUsers[payload.to]?.socketId;
     if (receiverSocketId) {
       await conversationService.saveConservation({
-        senderId: connectedUserId,
-        receiverId: payload.to,
+        senderId: new ObjectId(payload.from),
+        receiverId: new ObjectId(payload.to),
         message: payload.message
       })
 
