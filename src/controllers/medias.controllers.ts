@@ -107,7 +107,6 @@ export const serveStreamingVideoController = (req: Request, res: Response) => {
 
 export const videoStatusController = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log("ID::: ", id);
   const status = await mediaService.getVideoStatus(id);
   res.json({
     message: MESSAGES.GET_VIDEO_STATUS_SUCCESSFUL,

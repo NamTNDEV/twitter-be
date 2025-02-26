@@ -69,7 +69,7 @@ class MediaService {
         const newNameFile = getNameWithoutExtension(video.newFilename);
         queue.enqueue(video.filepath);
         return {
-          url: `${envConfig.server.HOST}/static/video/${newNameFile}/master.m3u8`,
+          url: `${envConfig.server.HOST}/static/video-hls/${newNameFile}/master.m3u8`,
           type: MediaType.Video
         }
       })

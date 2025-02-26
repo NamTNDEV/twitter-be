@@ -15,6 +15,7 @@ import { createServer } from "http";
 import { conversationRoutes } from './routes/conversation.routes';
 import initSocketHttpServer from './utils/socket';
 import envConfig from './constants/config';
+import helmet from 'helmet';
 
 const app = express();
 const httpServer = createServer(app);
@@ -22,7 +23,12 @@ const PORT = envConfig.server.PORT;
 
 initUploadsDir();
 
-app.use(cors());
+app.use(helmet())
+app.use(cors(
+  {
+    origin: envConfig.server.CLIENT_URL,
+  }
+));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 db.initialize();
