@@ -229,16 +229,7 @@ export const accessTokenValidation = validate(checkSchema({
     custom: {
       options: async (value: string, { req }) => {
         const accessToken = (value || "").split(" ")[1];
-        if (!accessToken) {
-          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.ACCESS_TOKEN_IS_REQUIRED });
-        }
-        try {
-          const decoded_authorization = await verifyToken({ token: accessToken, publicOrSecretKey: process.env.JWT_ACCESS_TOKEN_PRIVATE_KEY as string });
-          (req as RequestExpress).decoded_authorization = decoded_authorization;
-        } catch (error) {
-          throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });
-        }
-        return true;
+        return await authService.verifyAccessToken(accessToken, req as Request);
       }
     }
   }

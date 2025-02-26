@@ -16,7 +16,7 @@ class ConversationService {
         { senderId: receiverId, receiverId: senderId }
       ]
     };
-    const conversations = await db.getConversationCollection().find($match).skip((page - 1) * limit).limit(limit).toArray();
+    const conversations = (await db.getConversationCollection().find($match).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).toArray()).reverse();
     const total = await db.getConversationCollection().countDocuments($match);
     return {
       conversations,

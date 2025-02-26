@@ -16,6 +16,13 @@ import { Server } from "socket.io";
 import conversationService from './services/convesation.services';
 import { ObjectId } from 'mongodb';
 import { conversationRoutes } from './routes/conversation.routes';
+import Conversation from './models/schemas/Conversation.schemas';
+import authService from './services/auth.services';
+import { TokenPayload } from './models/requests/user.requests';
+import { UserVerifyStatus } from './constants/enums';
+import { ErrorWithStatus } from './models/Errors';
+import { HTTP_STATUS } from './constants/httpStatus';
+import { MESSAGES } from './constants/messages';
 
 config();
 const app = express();
@@ -54,6 +61,33 @@ const connectedUsers: {
   }
 } = {}
 
+io.use(async (socket, next) => {
+  const { authorization } = socket.handshake.auth;
+  const accessToken = authorization?.split(" ")[1];
+  try {
+    const decode_authorization = await authService.verifyAccessToken(accessToken);
+    const { verify_status } = decode_authorization as TokenPayload;
+    if (verify_status !== UserVerifyStatus.Verified) {
+      throw new ErrorWithStatus({
+        message: MESSAGES.USER_NOT_VERIFIED,
+        status: HTTP_STATUS.FORBIDDEN
+      })
+    }
+
+    socket.handshake.auth.user_id = (decode_authorization as TokenPayload).user_id;
+    socket.handshake.auth.access_token = accessToken;
+
+    next();
+  } catch (error) {
+    next({
+      message: MESSAGES.UNAUTHORIZED,
+      name: "UnauthorizedError",
+      data: error
+    })
+  }
+
+});
+
 io.on("connection", (socket) => {
   const connectedUserId = socket.handshake.auth.user_id;
   if (!connectedUserId) {
@@ -64,18 +98,39 @@ io.on("connection", (socket) => {
     socketId: socket.id
   };
 
-  socket.on("chat message", async (payload: { to: string, from: string, message: string }) => {
-    const receiverSocketId = connectedUsers[payload.to]?.socketId;
-    if (receiverSocketId) {
-      await conversationService.saveConservation({
-        senderId: new ObjectId(payload.from),
-        receiverId: new ObjectId(payload.to),
-        message: payload.message
-      })
+  socket.use(async (packet, next) => {
+    const { access_token } = socket.handshake.auth;
+    try {
+      await authService.verifyAccessToken(access_token)
+    } catch (error) {
+      next(new Error(MESSAGES.UNAUTHORIZED))
+    }
+    next();
+  })
 
-      socket.to(receiverSocketId).emit("receive message", {
-        from_id: connectedUserId,
-        message: payload.message
+  socket.on('error', (error) => {
+    if (error.message === MESSAGES.UNAUTHORIZED) {
+      socket.disconnect();
+    }
+  });
+
+  socket.on("send_message", async (payload: { receiverId: string, senderId: string, message: string, createdAt: Date, updatedAt: Date }) => {
+    const { receiverId, senderId, message, createdAt, updatedAt } = payload;
+    const receiverSocketId = connectedUsers[receiverId]?.socketId;
+
+    const newConversation: Conversation = {
+      senderId: new ObjectId(senderId),
+      receiverId: new ObjectId(receiverId),
+      message,
+      createdAt,
+      updatedAt,
+    }
+
+    await conversationService.saveConservation(newConversation);
+
+    if (receiverSocketId) {
+      socket.to(receiverSocketId).emit("receive_message", {
+        ...newConversation,
       });
     }
   });

@@ -3,7 +3,13 @@ import { ObjectId } from "mongodb";
 import db from "~/configs/db.configs";
 import { TokenTypes, UserVerifyStatus } from "~/constants/enums";
 import RefreshToken from "~/models/schemas/RefreshToken.schemas";
-import { signToken } from "~/utils/jwt";
+import { signToken, verifyToken } from "~/utils/jwt";
+import { Request } from "express";
+import { ErrorWithStatus } from "~/models/Errors";
+import { HTTP_STATUS } from "~/constants/httpStatus";
+import { MESSAGES } from "~/constants/messages";
+import { capitalize } from "lodash";
+import { JsonWebTokenError } from "jsonwebtoken";
 
 config();
 class AuthService {
@@ -79,6 +85,22 @@ class AuthService {
 
   public async deleteRefreshToken(refreshToken: string) {
     return await db.getRefreshTokenCollection().deleteOne({ token: refreshToken });
+  }
+
+  public async verifyAccessToken(accessToken: string, req?: Request) {
+    if (!accessToken) {
+      throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.ACCESS_TOKEN_IS_REQUIRED });
+    }
+    try {
+      const decoded_authorization = await verifyToken({ token: accessToken, publicOrSecretKey: process.env.JWT_ACCESS_TOKEN_PRIVATE_KEY as string });
+      if (req) {
+        (req as Request).decoded_authorization = decoded_authorization;
+        return true;
+      }
+      return decoded_authorization;
+    } catch (error) {
+      throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });
+    }
   }
 }
 
