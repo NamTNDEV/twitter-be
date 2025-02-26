@@ -11,9 +11,19 @@ import { tweetsRouter } from './routes/tweet.routes';
 import { bookmarksRoutes } from './routes/bookmarks.routes';
 import { likesRoutes } from './routes/likes.routes';
 import { searchRoutes } from './routes/search.routes';
+import { createServer } from "http";
+import { Server } from "socket.io";
+import conversationService from './services/convesation.services';
 
 config();
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+    // methods: ["GET", "POST"]
+  }
+});
 const PORT = process.env.PORT || 8080;
 
 initUploadsDir();
@@ -35,6 +45,44 @@ app.use('/likes', likesRoutes);
 app.use('/search', searchRoutes);
 app.use(defaultErrorHandler);
 
-app.listen(PORT, () => {
+const connectedUsers: {
+  [key: string]: {
+    socketId: string;
+  }
+} = {}
+
+io.on("connection", (socket) => {
+  const connectedUserId = socket.handshake.auth.user_id;
+  if (!connectedUserId) {
+    return;
+  }
+
+  connectedUsers[connectedUserId] = {
+    socketId: socket.id
+  };
+
+  socket.on("chat message", async (payload) => {
+    const receiverSocketId = connectedUsers[payload.to]?.socketId;
+    if (receiverSocketId) {
+      await conversationService.saveConservation({
+        senderId: connectedUserId,
+        receiverId: payload.to,
+        message: payload.message
+      })
+
+      socket.to(receiverSocketId).emit("receive message", {
+        from_id: connectedUserId,
+        message: payload.message
+      });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    delete connectedUsers[connectedUserId];
+  }
+  );
+});
+
+httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}, http://localhost:${PORT}`);
 });

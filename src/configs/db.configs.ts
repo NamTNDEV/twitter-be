@@ -82,6 +82,10 @@ class Database {
     return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_LIKES}`);
   }
 
+  getConversationCollection() {
+    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_CONVERSATION}`);
+  }
+
   getCollection(collectionName: string) {
     return this.client.db(`${process.env.DB_NAME}`).collection(collectionName);
   }

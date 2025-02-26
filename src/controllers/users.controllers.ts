@@ -46,7 +46,7 @@ export const oauthController = async (req: Request, res: Response) => {
     verifyStatus
   } = await userService.oauthLogin(code as string);
 
-  const redirectUrl = `${process.env.OAUTH_CLIENT_REDIRECT_CALLBACK}?accessToken=${accessToken}&refreshToken=${refreshToken}&isNewUser=${isNewUser}&verifyStatus=${verifyStatus}`;
+  const redirectUrl = `${process.env.OAUTH_CLIENT_REDIRECT_CALLBACK}?access_token=${accessToken}&refresh_token=${refreshToken}&is_new_user=${isNewUser}&verify_status=${verifyStatus}`;
   res.redirect(redirectUrl);
   return;
 }
