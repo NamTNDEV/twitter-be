@@ -14,11 +14,11 @@ import { searchRoutes } from './routes/search.routes';
 import { createServer } from "http";
 import { conversationRoutes } from './routes/conversation.routes';
 import initSocketHttpServer from './utils/socket';
+import envConfig from './constants/config';
 
-config();
 const app = express();
 const httpServer = createServer(app);
-const PORT = process.env.PORT || 8080;
+const PORT = envConfig.server.PORT;
 
 initUploadsDir();
 

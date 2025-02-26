@@ -5,14 +5,13 @@ import db from "~/configs/db.configs";
 import { EncodingStatus, MediaType } from "~/constants/enums";
 import { Media } from "~/models/Other";
 import VideoStatus from "~/models/schemas/VideoStatus.schemas";
-import { checkEnv } from "~/utils/env.ultis";
 import { deleteFileAfterUpload, getNameWithoutExtension, handleUploadImages, handleUploadVideo, handleUploadVideoHls, imagesPath, } from "~/utils/file";
 import { Queue } from "~/utils/queue";
-import { encodeHLSWithMultipleVideoStreams } from "~/utils/video";
 import fsPromise from 'fs/promises'
 import { uploadFileToS3 } from "~/utils/s3";
 import { CompleteMultipartUploadCommandOutput } from "@aws-sdk/client-s3";
 import mime from 'mime';
+import envConfig from "~/constants/config";
 
 const queue = Queue.getInstance();
 class MediaService {
@@ -30,17 +29,10 @@ class MediaService {
           filePath: uploadPath,
           contentType: mime.getType(uploadPath) as string
         });
-
-        // deleteFileAfterUpload(file.filepath);
         Promise.all([
           fsPromise.unlink(file.filepath),
           fsPromise.unlink(uploadPath)
         ])
-        // return {
-        //   url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/image/${decoratedFilename}` : `${process.env.HOST}/static/image/${decoratedFilename}`,
-        //   type: MediaType.Image
-        // }
-
         return {
           url: (s3Result as CompleteMultipartUploadCommandOutput).Location as string,
           type: MediaType.Image
@@ -77,7 +69,7 @@ class MediaService {
         const newNameFile = getNameWithoutExtension(video.newFilename);
         queue.enqueue(video.filepath);
         return {
-          url: checkEnv("dev") ? `http://localhost:${process.env.PORT}/static/video-hls/${newNameFile}/master.m3u8` : `${process.env.HOST}/static/video/${newNameFile}/master.m3u8`,
+          url: `${envConfig.server.HOST}/static/video/${newNameFile}/master.m3u8`,
           type: MediaType.Video
         }
       })

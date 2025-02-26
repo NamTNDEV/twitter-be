@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb';
+import envConfig from '~/constants/config';
 import { UserVerifyStatus } from '~/constants/enums';
 import { HTTP_STATUS } from '~/constants/httpStatus';
 import { MESSAGES } from '~/constants/messages';
@@ -9,7 +10,6 @@ import { ChangePasswordReqBody, FollowReqBody, ForgotPasswordReqBody, GetProfile
 import { User } from '~/models/schemas/User.schemas';
 import authService from '~/services/auth.services';
 import userService from '~/services/users.services';
-
 
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User;
@@ -46,7 +46,7 @@ export const oauthController = async (req: Request, res: Response) => {
     verifyStatus
   } = await userService.oauthLogin(code as string);
 
-  const redirectUrl = `${process.env.OAUTH_CLIENT_REDIRECT_CALLBACK}?access_token=${accessToken}&refresh_token=${refreshToken}&is_new_user=${isNewUser}&verify_status=${verifyStatus}`;
+  const redirectUrl = `${envConfig.oauth.GOOGLE.CLIENT_REDIRECT_CALLBACK}?access_token=${accessToken}&refresh_token=${refreshToken}&is_new_user=${isNewUser}&verify_status=${verifyStatus}`;
   res.redirect(redirectUrl);
   return;
 }

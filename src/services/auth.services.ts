@@ -10,8 +10,8 @@ import { HTTP_STATUS } from "~/constants/httpStatus";
 import { MESSAGES } from "~/constants/messages";
 import { capitalize } from "lodash";
 import { JsonWebTokenError } from "jsonwebtoken";
+import envConfig from "~/constants/config";
 
-config();
 class AuthService {
   public async signForgotPasswordToken({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }): Promise<string> {
     return await signToken({
@@ -20,9 +20,9 @@ class AuthService {
         token_type: TokenTypes.ForgotPasswordToken,
         verify_status: verifyStatus
       },
-      privateKey: process.env.PASSWORD_FORGOT_TOKEN_PRIVATE_KEY as string,
+      privateKey: envConfig.security.PASSWORD_FORGOT_TOKEN.PRIVATE_KEY as string,
       options: {
-        expiresIn: process.env.PASSWORD_FORGOT_TOKEN_EXPIRE
+        expiresIn: envConfig.security.PASSWORD_FORGOT_TOKEN.EXPIRE
       }
     });
   }
@@ -34,9 +34,9 @@ class AuthService {
         token_type: TokenTypes.AccessToken,
         verify_status: verifyStatus
       },
-      privateKey: process.env.JWT_ACCESS_TOKEN_PRIVATE_KEY as string,
+      privateKey: envConfig.jwt.ACCESS_TOKEN.PRIVATE_KEY as string,
       options: {
-        expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRE
+        expiresIn: envConfig.jwt.ACCESS_TOKEN.EXPIRE
       }
     });
   }
@@ -50,7 +50,7 @@ class AuthService {
           verify_status: verifyStatus,
           exp
         },
-        privateKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string,
+        privateKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string,
       });
     }
     return await signToken({
@@ -59,9 +59,9 @@ class AuthService {
         token_type: TokenTypes.RefreshToken,
         verify_status: verifyStatus
       },
-      privateKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string,
+      privateKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string,
       options: {
-        expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRE
+        expiresIn: envConfig.jwt.REFRESH_TOKEN.EXPIRE
       }
     });
   }
@@ -92,7 +92,7 @@ class AuthService {
       throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.ACCESS_TOKEN_IS_REQUIRED });
     }
     try {
-      const decoded_authorization = await verifyToken({ token: accessToken, publicOrSecretKey: process.env.JWT_ACCESS_TOKEN_PRIVATE_KEY as string });
+      const decoded_authorization = await verifyToken({ token: accessToken, publicOrSecretKey: envConfig.jwt.ACCESS_TOKEN.PRIVATE_KEY as string });
       if (req) {
         (req as Request).decoded_authorization = decoded_authorization;
         return true;

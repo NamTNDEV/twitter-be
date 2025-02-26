@@ -16,6 +16,7 @@ import { UserVerifyStatus } from '~/constants/enums';
 import { TokenPayload } from '~/models/requests/user.requests';
 import { ObjectId } from 'mongodb';
 import { REGEX_USERNAME } from '~/constants/regex';
+import envConfig from '~/constants/config';
 
 const passwordValidatorSchema: ParamSchema = {
   trim: true,
@@ -81,7 +82,7 @@ const forgotPasswordTokenValidatorSchema: ParamSchema = {
         throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED });
       }
       try {
-        const decoded_forgot_password_token = await verifyToken({ token: value, publicOrSecretKey: process.env.PASSWORD_FORGOT_TOKEN_PRIVATE_KEY as string });
+        const decoded_forgot_password_token = await verifyToken({ token: value, publicOrSecretKey: envConfig.security.PASSWORD_FORGOT_TOKEN.PRIVATE_KEY as string });
         const { user_id } = decoded_forgot_password_token;
         const user = await userService.getUserById(user_id);
         if (!user) {
@@ -245,7 +246,7 @@ export const refreshTokenValidation = validate(checkSchema({
         }
         try {
           const [decoded_refresh_token, refresh_token] = await Promise.all(
-            [verifyToken({ token: value, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string }), authService.checkRefreshTokenIsExist(value)]
+            [verifyToken({ token: value, publicOrSecretKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string }), authService.checkRefreshTokenIsExist(value)]
           );
           if (!refresh_token) {
             throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.REFRESH_TOKEN_NOT_FOUND });
@@ -273,7 +274,7 @@ export const emailVerifyTokenValidation = validate(checkSchema({
           throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: MESSAGES.EMAIL_TOKEN_IS_REQUIRED });
         }
         try {
-          const decoded_email_token = await verifyToken({ token: value, publicOrSecretKey: process.env.EMAIL_TOKEN_PRIVATE_KEY as string });
+          const decoded_email_token = await verifyToken({ token: value, publicOrSecretKey: envConfig.email.EMAIL_TOKEN.PRIVATE_KEY as string });
           (req as RequestExpress).decoded_email_token = decoded_email_token;
         } catch (error) {
           throw new ErrorWithStatus({ status: HTTP_STATUS.UNAUTHORIZED, message: capitalize((error as JsonWebTokenError).message) });

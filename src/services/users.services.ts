@@ -13,6 +13,7 @@ import Follower from "~/models/schemas/Follower.schemas";
 import axios from "axios";
 import { verifyToken } from "~/utils/jwt";
 import { sendForgotPasswordEmailWithTemplate, sendVerifyEmailWithTemplate } from "~/utils/email";
+import envConfig from "~/constants/config";
 
 export interface OAuthGoogleTokenResType {
   access_token: string;
@@ -35,12 +36,12 @@ class UserService {
   private async getOauthGoogleToken(code: string) {
     const body = {
       code,
-      client_id: process.env.OAUTH_GOOGLE_CLIENT_ID,
-      client_secret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.OAUTH_GOOGLE_REDIRECT_URI,
+      client_id: envConfig.oauth.GOOGLE.CLIENT_ID,
+      client_secret: envConfig.oauth.GOOGLE.CLIENT_SECRET,
+      redirect_uri: envConfig.oauth.GOOGLE.REDIRECT_URI,
       grant_type: 'authorization_code'
     }
-    const { data } = await axios.post((process.env.OAUTH_GOOGLE_TOKEN_URL || "https://oauth2.googleapis.com/token"), body, {
+    const { data } = await axios.post((envConfig.oauth.GOOGLE.TOKEN_URL || "https://oauth2.googleapis.com/token"), body, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
@@ -49,7 +50,7 @@ class UserService {
   }
 
   private async getOauthGoogleUserInfo(accessToken: string, id_token: string) {
-    const { data } = await axios.get((process.env.OAUTH_GOOGLE_USERINFO_URL || "https://www.googleapis.com/oauth2/v1/userinfo"), {
+    const { data } = await axios.get((envConfig.oauth.GOOGLE.USERINFO_URL || "https://www.googleapis.com/oauth2/v1/userinfo"), {
       headers: {
         Authorization: `Bearer ${id_token}`
       },
@@ -64,7 +65,7 @@ class UserService {
 
   public async login({ userId, verifyStatus }: { userId: string, verifyStatus: UserVerifyStatus }) {
     const [accessToken, refreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus });
-    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string });
     await authService.saveRefreshToken(userId, refreshToken, exp, iat);
     return { accessToken, refreshToken };
   }
@@ -129,7 +130,7 @@ class UserService {
         verifyStatus: UserVerifyStatus.Unverified
       }
     );
-    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string });
     await authService.saveRefreshToken(userId.toString(), refreshToken, exp, iat);
 
     await sendVerifyEmailWithTemplate(
@@ -145,7 +146,7 @@ class UserService {
 
   public async refreshToken({ userId, refreshToken, verifyStatus, exp }: { userId: string, refreshToken: string, verifyStatus: UserVerifyStatus, exp: number }) {
     const [accessToken, newRefreshToken] = await authService.signPairOfJwtTokens({ userId, verifyStatus, exp });
-    const decoded_refresh_token = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    const decoded_refresh_token = await verifyToken({ token: refreshToken, publicOrSecretKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string });
     await authService.saveRefreshToken(userId, newRefreshToken, decoded_refresh_token.exp, decoded_refresh_token.iat);
     await authService.deleteRefreshToken(refreshToken);
 
@@ -192,7 +193,7 @@ class UserService {
     ]);
 
     const [accessToken, refreshToken] = pairOfTokens;
-    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY as string });
+    const { iat, exp } = await verifyToken({ token: refreshToken, publicOrSecretKey: envConfig.jwt.REFRESH_TOKEN.PRIVATE_KEY as string });
     await authService.saveRefreshToken(userId, refreshToken, exp, iat);
 
     return {

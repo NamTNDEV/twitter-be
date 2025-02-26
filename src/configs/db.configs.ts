@@ -9,9 +9,9 @@ import Hashtag from '~/models/schemas/Hashtag';
 import Bookmark from '~/models/schemas/Bookmark.schemas';
 import Like from '~/models/schemas/Like.schemas';
 import { MediaQueryType, MediaType, TweetAudience, TweetType } from '~/constants/enums';
+import envConfig from '~/constants/config';
 
-dotenv.config();
-const url = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
+const url = `mongodb+srv://${envConfig.database.DB_USERNAME}:${envConfig.database.DB_PASSWORD}@twitter.ojj4u.mongodb.net/?retryWrites=true&w=majority&appName=Twitter`;
 
 class Database {
   static instance: Database;
@@ -30,7 +30,7 @@ class Database {
 
   async connect() {
     try {
-      await this.client.db(`${process.env.DB_USERNAME}`).command({ ping: 1 });
+      await this.client.db(`${envConfig.database.DB_USERNAME}`).command({ ping: 1 });
       console.log('✅ Connected to MongoDB');
     } catch (error) {
       console.error('❌ connecting to MongoDB::: ', error);
@@ -47,47 +47,47 @@ class Database {
   }
 
   getUserCollection(): Collection<UserType> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_USERS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.USERS}`);
   }
 
   getRefreshTokenCollection(): Collection<RefreshToken> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_REFRESH_TOKENS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.REFRESH_TOKENS}`);
   }
 
   getEmailVerifyTokenCollection(): Collection<RefreshToken> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_EMAIL_VERIFY_TOKENS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.EMAIL_VERIFY_TOKENS}`);
   }
 
   getFollowersCollection(): Collection<Follower> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_FOLLOWERS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.FOLLOWERS}`);
   }
 
   getVideoStatusCollection(): Collection<VideoStatus> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_VIDEO_STATUS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.VIDEO_STATUS}`);
   }
 
   getTweetCollection(): Collection<Tweet> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_TWEETS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.TWEETS}`);
   }
 
   getHashtagCollection(): Collection<Hashtag> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_HASH_TAGS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.HASH_TAGS}`);
   }
 
   getBookmarkCollection(): Collection<Bookmark> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_BOOKMARKS}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.BOOKMARKS}`);
   }
 
   getLikeCollection(): Collection<Like> {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_COLLECTION_LIKES}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.LIKES}`);
   }
 
   getConversationCollection() {
-    return this.client.db(`${process.env.DB_NAME}`).collection(`${process.env.DB_CONVERSATION}`);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(`${envConfig.database.COLLECTIONS.CONVERSATIONS}`);
   }
 
   getCollection(collectionName: string) {
-    return this.client.db(`${process.env.DB_NAME}`).collection(collectionName);
+    return this.client.db(`${envConfig.database.DB_NAME}`).collection(collectionName);
   }
 
   async indexUserCollection() {

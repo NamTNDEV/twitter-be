@@ -2,13 +2,13 @@ import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses'
 import { config } from 'dotenv'
 import fs from 'fs';
 import path from 'path';
+import envConfig from '~/constants/config';
 
-config()
 const sesClient = new SESClient({
-  region: process.env.AWS_REGION,
+  region: envConfig.aws.AWS_REGION,
   credentials: {
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string
+    secretAccessKey: envConfig.aws.AWS_SECRET_ACCESS_KEY as string,
+    accessKeyId: envConfig.aws.AWS_ACCESS_KEY_ID as string
   }
 })
 
@@ -51,7 +51,7 @@ const createSendEmailCommand = ({
 
 const sendVerifyEmail = (toAddress: string, subject: string, body: string) => {
   const sendEmailCommand = createSendEmailCommand({
-    fromAddress: process.env.SES_FROM_ADDRESS as string,
+    fromAddress: envConfig.aws.SES_FROM_ADDRESS as string,
     toAddresses: toAddress,
     body,
     subject
@@ -102,7 +102,7 @@ export const sendVerifyEmailWithTemplate = (toAddress: string, verifyToken: stri
     emailSubject: "Verify your email address",
     emailTitle: "Verify your email address",
     emailMessage: "Click the button below to verify your email address",
-    actionLink: `${process.env.CLIENT_URL}/verify-email?token=${verifyToken}`,
+    actionLink: `${envConfig.server.CLIENT_URL}/verify-email?token=${verifyToken}`,
     buttonText: "Verify Email",
     emailFooter: "If you did not request this, please ignore this email and your password will remain unchanged."
   });
@@ -116,7 +116,7 @@ export const sendForgotPasswordEmailWithTemplate = (toAddress: string, forgotPas
     emailSubject: "Reset Your Password",
     emailTitle: "Forgot Your Password?",
     emailMessage: "We received a request to reset your password. Click the button below to set a new password.",
-    actionLink: `${process.env.CLIENT_URL}/reset-password?token=${forgotPasswordToken}`,
+    actionLink: `${envConfig.server.CLIENT_URL}/reset-password?token=${forgotPasswordToken}`,
     buttonText: "Reset Password",
     emailFooter: "If you did not request a password reset, please ignore this email.If you did not request a password reset, please ignore this email."
   });

@@ -9,11 +9,12 @@ import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Errors";
 import Conversation from "~/models/schemas/Conversation.schemas";
 import conversationService from "~/services/convesation.services";
+import envConfig from "~/constants/config";
 
 const initSocketHttpServer = (httpServer: HttpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL,
+      origin: envConfig.server.CLIENT_URL,
       // methods: ["GET", "POST"]
     }
   });
