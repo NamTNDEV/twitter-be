@@ -2,8 +2,8 @@ import { ObjectId } from "mongodb";
 
 export interface LikeSchemaType {
   _id?: ObjectId;
-  tweet_id: string;
-  user_id: string;
+  tweet_id: ObjectId;
+  user_id: ObjectId;
   createdAt?: Date;
 }
 

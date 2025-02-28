@@ -9,7 +9,7 @@ class LikeService {
     return like;
   }
 
-  public async likeTweet(user_id: string, tweet_id: string) {
+  public async likeTweet(user_id: ObjectId, tweet_id: ObjectId) {
     const likeResult = await db.getLikeCollection().findOneAndUpdate(
       {
         user_id,

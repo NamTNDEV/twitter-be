@@ -8,7 +8,7 @@ class BookmarkService {
     return bookmark;
   }
 
-  public async bookmarkTweet(user_id: string, tweet_id: string) {
+  public async bookmarkTweet(user_id: ObjectId, tweet_id: ObjectId) {
     const bookmarkResult = await db.getBookmarkCollection().findOneAndUpdate(
       {
         user_id,
