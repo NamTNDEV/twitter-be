@@ -1,0 +1,131 @@
+name: '::: CI/CD Pipeline :::'
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      SHA: ${{ steps.short_sha.outputs.SHA }}
+    steps:
+      - name: '::: 🛎️ Checkout :::'
+        uses: actions/checkout@v4
+      - name: '::: Create .env file :::'
+        run: echo "${{ secrets.ENV_PROD }}" > .env.production
+      - name: '::: 🔖 Generate short SHA :::'
+        id: short_sha
+        run: |
+          echo "SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+          echo "Generated SHA: $(echo ${{ github.sha }} | cut -c1-7)"
+      - name: '::: 🐳 Build Docker image :::'
+        run: docker build -t fe_deploy_learning .
+      - name: '::: 🔑 Login to Docker Hub :::'
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: '::: 🔖 Tag Docker image :::'
+        run: |
+          docker tag fe_deploy_learning namudp0301/fe_deploy_learning:${{ steps.short_sha.outputs.SHA }}
+          docker tag fe_deploy_learning namudp0301/fe_deploy_learning:latest
+      - name: '::: 🚀 Push Docker image :::'
+        run: |
+          docker push namudp0301/fe_deploy_learning:${{ steps.short_sha.outputs.SHA }}
+          docker push namudp0301/fe_deploy_learning:latest
+      - name: '::: 📝 Print output SHA :::'
+        run: echo "Output SHA is ${{ steps.short_sha.outputs.SHA }}"
+      - name: '::: 📨 Send Telegram notification after build :::'
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ✅ Build success!
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+
+            Repository: ${{ github.repository }}
+
+            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+      - name: '::: 📨 Send Telegram notification after build :::'
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚨 Build failed!
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+
+            Repository: ${{ github.repository }}
+
+            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: '::: 📝 Print received SHA :::'
+        run: echo "Received SHA from build job is ${{ needs.build.outputs.SHA }}"
+      - name: '::: Connect to VPS & Deploy :::'
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            sudo docker pull namudp0301/fe_deploy_learning:latest
+            sudo docker stop fe_deploy_learning || true
+            sudo docker rm fe_deploy_learning || true
+            sudo docker run -d -p ${{ secrets.EXTERNAL_PORT }}:${{ secrets.INTERNAL_PORT }} --name fe_deploy_learning --restart unless-stopped namudp0301/fe_deploy_learning:latest
+
+            # Dọn dẹp container không sử dụng
+            echo "🧹 Cleaning up unused containers..."
+            sudo docker container prune -f
+
+            # Giới hạn số image lưu trữ - giữ lại 5 image mới nhất
+            echo "🧹 Keeping only 5 most recent images..."
+            images_to_remove=$(sudo docker images namudp0301/fe_deploy_learning --format "{{.ID}}" | tail -n +6)
+            if [ ! -z "$images_to_remove" ]; then
+                echo "$images_to_remove" | xargs sudo docker rmi -f || true
+            else
+                echo "No old images to remove"
+            fi
+
+            # Xóa dangling images (untagged)
+            echo "🧹 Removing dangling images..."
+            sudo docker image prune -f
+
+            echo "🎉 Deployment completed successfully!"
+
+      - name: '::: 📨 Send Telegram notification after deploy :::'
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ✅ Deployment success!
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+
+            Repository: ${{ github.repository }}
+
+            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+      - name: '::: 📨 Send Telegram notification after deploy :::'
+        if: failure()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚨 Deployment failed!
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+
+            Repository: ${{ github.repository }}
+
+            See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}

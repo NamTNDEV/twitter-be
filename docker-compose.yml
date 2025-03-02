@@ -1,10 +1,13 @@
 version: '3.8'
 services:
-  twitter-clone:
+  twitter_clone:
     build:
       context: .
       dockerfile: Dockerfile
-    image: namtndev/twitter_clone:v0
+      platforms:
+        - linux/amd64
+    image: namudp0301/twitter_clone_be:v0
+    container_name: twitter_clone_be
     ports:
       - '3000:3000'
     restart: always
