@@ -70,7 +70,7 @@ class MediaService {
         queue.enqueue(video.filepath);
         return {
           url: `${envConfig.server.HOST}/static/video-hls/${newNameFile}/master.m3u8`,
-          type: MediaType.Video
+          type: MediaType.HLS
         }
       })
     );
