@@ -20,17 +20,17 @@ jobs:
           echo "SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
           echo "Generated SHA: $(echo ${{ github.sha }} | cut -c1-7)"
       - name: '::: 🐳 Build Docker image :::'
-        run: docker build -t fe_deploy_learning .
+        run: docker build -t twitter_clone_be .
       - name: '::: 🔑 Login to Docker Hub :::'
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: '::: 🔖 Tag Docker image :::'
         run: |
-          docker tag fe_deploy_learning namudp0301/fe_deploy_learning:${{ steps.short_sha.outputs.SHA }}
-          docker tag fe_deploy_learning namudp0301/fe_deploy_learning:latest
+          docker tag twitter_clone_be namudp0301/twitter_clone_be:${{ steps.short_sha.outputs.SHA }}
+          docker tag twitter_clone_be namudp0301/twitter_clone_be:latest
       - name: '::: 🚀 Push Docker image :::'
         run: |
-          docker push namudp0301/fe_deploy_learning:${{ steps.short_sha.outputs.SHA }}
-          docker push namudp0301/fe_deploy_learning:latest
+          docker push namudp0301/twitter_clone_be:${{ steps.short_sha.outputs.SHA }}
+          docker push namudp0301/twitter_clone_be:latest
       - name: '::: 📝 Print output SHA :::'
         run: echo "Output SHA is ${{ steps.short_sha.outputs.SHA }}"
       - name: '::: 📨 Send Telegram notification after build :::'
@@ -77,10 +77,10 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            sudo docker pull namudp0301/fe_deploy_learning:latest
-            sudo docker stop fe_deploy_learning || true
-            sudo docker rm fe_deploy_learning || true
-            sudo docker run -d -p ${{ secrets.EXTERNAL_PORT }}:${{ secrets.INTERNAL_PORT }} --name fe_deploy_learning --restart unless-stopped namudp0301/fe_deploy_learning:latest
+            sudo docker pull namudp0301/twitter_clone_be:latest
+            sudo docker stop twitter_clone_be || true
+            sudo docker rm twitter_clone_be || true
+            sudo docker run -d -p ${{ secrets.EXTERNAL_PORT }}:${{ secrets.INTERNAL_PORT }} --name twitter_clone_be --restart unless-stopped namudp0301/twitter_clone_be:latest
 
             # Dọn dẹp container không sử dụng
             echo "🧹 Cleaning up unused containers..."
@@ -88,7 +88,7 @@ jobs:
 
             # Giới hạn số image lưu trữ - giữ lại 5 image mới nhất
             echo "🧹 Keeping only 5 most recent images..."
-            images_to_remove=$(sudo docker images namudp0301/fe_deploy_learning --format "{{.ID}}" | tail -n +6)
+            images_to_remove=$(sudo docker images namudp0301/twitter_clone_be --format "{{.ID}}" | tail -n +6)
             if [ ! -z "$images_to_remove" ]; then
                 echo "$images_to_remove" | xargs sudo docker rmi -f || true
             else
